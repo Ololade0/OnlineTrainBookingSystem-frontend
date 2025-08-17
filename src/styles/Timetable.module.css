@@ -1,0 +1,105 @@
+/* Timetable.module.css */
+/* Styles for Train Timetable page */
+
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.hero {
+  text-align: center;
+  padding: 2rem;
+  background: #e6f4ea;
+  color: #166534;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 1rem;
+}
+
+.controls label {
+  font-weight: bold;
+}
+
+.controls select {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.controls button {
+  background: #16a34a;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.controls button:hover {
+  background: #15803d;
+}
+
+.error {
+  text-align: center;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin: 1rem auto;
+  width: 80%;
+}
+
+.info {
+  text-align: center;
+  background: #fef9c3;
+  color: #854d0e;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin: 1rem auto;
+  width: 80%;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  margin: 1rem auto;
+  width: 90%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.table th {
+  background: #166534;
+  color: white;
+}
+
+.table tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.table tr:hover {
+  background: #e6f4ea;
+}
