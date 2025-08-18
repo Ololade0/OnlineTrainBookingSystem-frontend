@@ -1,5 +1,3 @@
-
-// // Timetable.jsx
 // import React, { useState } from "react";
 // import Header from "../components/Header";
 // import Footer from "../components/Footer";
@@ -8,7 +6,7 @@
 // const Timetable = () => {
 //   // Available enum routes (exact values from backend)
 //   const routes = [
-//       "LAGOS_IBADAN_MORNING_TRAIN",
+//     "LAGOS_IBADAN_MORNING_TRAIN",
 //     "LAGOS_IBADAN_AFTERNOON_TRAIN",
 //     "IBADAN_LAGOS_MORNING_TRAIN",
 //     "ABUJA_KADUNA_MORNING_TRAIN",
@@ -23,7 +21,7 @@
 //   // Fetch schedules from backend
 //   const fetchSchedules = async () => {
 //     if (!selectedRoute) {
-//       setError("Please select a route first.");
+//       setError("Please select a route first."); // Alert if no route selected
 //       return;
 //     }
 
@@ -31,15 +29,19 @@
 //     setError("");
 //     setSchedules([]);
 
-//     try {
-//       const response = await fetch(
-//         `${process.env.REACT_APP_API_BASE_URL}/schedule/schedule-route?route=${selectedRoute}`
-//       );
+//     const url = `${process.env.REACT_APP_API_BASE_URL}/schedule/schedule-route?route=${selectedRoute}`;
+//     console.log("Fetching from:", url); // DEBUG: logs URL being called
 
+//     try {
+//       const response = await fetch(url);
+
+//       // Handle non-200 responses
 //       if (!response.ok) {
-//         throw new Error("Failed to fetch schedules. Please try again.");
+//         const text = await response.text();
+//         throw new Error(`Server error: ${response.status} ${response.statusText}\nResponse: ${text}`);
 //       }
 
+//       // Handle non-JSON responses
 //       const contentType = response.headers.get("content-type");
 //       if (!contentType || !contentType.includes("application/json")) {
 //         const text = await response.text();
@@ -48,13 +50,17 @@
 
 //       const data = await response.json();
 
-//       if (data.length === 0) {
+//       // Handle empty array (no schedules found)
+//       if (!Array.isArray(data) || data.length === 0) {
 //         setError("No schedules found for this route.");
-//       } else {
-//         setSchedules(data);
+//         return;
 //       }
+
+//       // Success: set fetched schedules
+//       setSchedules(data);
 //     } catch (err) {
-//       setError(err.message || "Something went wrong.");
+//       console.error("Fetch error:", err);
+//       setError(err.message || "Something went wrong while fetching schedules.");
 //     } finally {
 //       setLoading(false);
 //     }
@@ -124,17 +130,7 @@
 // };
 
 // export default Timetable;
-// Timetable.jsx
-// Train Timetable Page with API Integration
-// - Dropdown lets user select route
-// - Button fetches schedules from backend
-// - Displays raw API data in a styled table
-// - Includes Header and Footer components
-// - Improved error handling for:
-//    1. No schedules found
-//    2. Network / fetch failures
-//    3. Non-JSON responses
-// - Logs fetch URL for easier debugging
+
 
 import React, { useState } from "react";
 import Header from "../components/Header";
@@ -142,7 +138,7 @@ import Footer from "../components/Footer";
 import styles from "../styles/Timetable.module.css";
 
 const Timetable = () => {
-  // Available enum routes (exact values from backend)
+  // List of routes exactly as defined in backend
   const routes = [
     "LAGOS_IBADAN_MORNING_TRAIN",
     "LAGOS_IBADAN_AFTERNOON_TRAIN",
@@ -164,16 +160,22 @@ const Timetable = () => {
     }
 
     setLoading(true);
-    setError("");
-    setSchedules([]);
+    setError(""); // Clear previous errors
+    setSchedules([]); // Clear previous schedules
 
     const url = `${process.env.REACT_APP_API_BASE_URL}/schedule/schedule-route?route=${selectedRoute}`;
-    console.log("Fetching from:", url); // DEBUG: logs URL being called
+    console.log("Fetching from:", url); // DEBUG: log URL being called
 
     try {
       const response = await fetch(url);
 
-      // Handle non-200 responses
+      // ✅ Handle 404 specifically to show user-friendly message
+      if (response.status === 404) {
+        setError("No schedules found for this route.");
+        return;
+      }
+
+      // Handle other non-200 responses
       if (!response.ok) {
         const text = await response.text();
         throw new Error(`Server error: ${response.status} ${response.statusText}\nResponse: ${text}`);
@@ -187,12 +189,6 @@ const Timetable = () => {
       }
 
       const data = await response.json();
-
-      // Handle empty array (no schedules found)
-      if (!Array.isArray(data) || data.length === 0) {
-        setError("No schedules found for this route.");
-        return;
-      }
 
       // Success: set fetched schedules
       setSchedules(data);
