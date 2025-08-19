@@ -1,191 +1,174 @@
-/* .pageWrapper {
+/* src/styles/Dashboard.module.css */
+
+/* Global page wrapper */
+.pageWrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f9f6;
 }
 
-/* Dashboard layout */
-/* .dashboard {
+/* Dashboard container: sidebar + main content */
+.dashboard {
   display: flex;
   flex: 1;
-  background: #f8fdf9;
-} */
-
-/* Sidebar */
-/* .sidebar {
-  width: 220px;
-  background: #0f5132; 
-  color: #fff;
-  padding: 1.5rem;
-  border-right: 3px solid #198754;
-} */
-
-/* .sidebar h2 {
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  min-height: calc(100vh - 80px); /* Adjust if header/footer heights change */
+  overflow-x: hidden;
 }
 
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: #0f5132;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  border-right: 3px solid #198754;
+  transition: width 0.3s;
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #198754;
+  padding-bottom: 0.6rem;
+}
+
+/* Sidebar navigation */
 .sidebar nav ul {
   list-style: none;
   padding: 0;
+  margin: 0 0 1rem 0;
 }
 
 .sidebar nav li {
   margin: 0.8rem 0;
 }
 
-.sidebar nav a {
+.sidebar nav a,
+.sidebarButton {
   color: #d1e7dd;
   text-decoration: none;
   font-weight: 500;
-}
-
-.sidebar nav a:hover {
-  color: #fff;
-}
-
-.content {
-  flex: 1;
-  padding: 2rem;
-}
-
-.content h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.cards {
-  margin-top: 2rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.card {
-  background: #fff;
-  border: 1px solid #d1e7dd;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}  */
-
-
-
-.pageWrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Dashboard layout */
-.dashboard {
-  display: flex;
-  flex: 1;
-  background: #f8fdf9;
-  overflow-x: hidden;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 240px;
-  background: #0f5132;
-  color: #fff;
-  padding: 1.5rem 1rem;
-  border-right: 3px solid #198754;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.sidebar h2 {
-  font-size: 1.4rem;
-  margin-bottom: 1rem;
-  color: #fff;
-  border-bottom: 1px solid #198754;
-  padding-bottom: 0.5rem;
-}
-
-.sidebar nav ul {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 1rem;
-}
-
-.sidebar nav li {
-  margin: 0.6rem 0;
-}
-
-.sidebar nav a {
-  color: #d1e7dd;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.3rem 0.5rem;
+  padding: 0.6rem 0.8rem;
   display: block;
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.sidebar nav a:hover {
-  background: #198754;
+.sidebar nav a:hover,
+.sidebarButton:hover {
+  background-color: #198754;
   color: #fff;
+  transform: translateX(3px);
 }
 
 .sectionTitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   color: #a3d3b3;
-  margin: 0.8rem 0 0.3rem 0;
+  margin: 1.2rem 0 0.4rem 0;
   font-weight: bold;
 }
 
 /* Content area */
 .content {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem 3rem;
+  overflow-y: auto;
+  background-color: #f8fdf9;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
+/* Page heading */
 .content h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   margin-bottom: 0.5rem;
   color: #0f5132;
+  font-weight: 700;
 }
 
+.content p {
+  color: #3a6351;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Cards grid */
 .cards {
-  margin-top: 2rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
+  gap: 1.8rem;
 }
 
-/* Card styles */
+/* Individual card */
 .card {
-  background: #fff;
-  border: 1px solid #d1e7dd;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-top: 5px solid #198754;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
 }
 
 .card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  margin-bottom: 0.8rem;
   color: #0f5132;
+  font-weight: 600;
 }
 
 .cardValue {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: bold;
   color: #198754;
+}
+
+/* Sidebar button styling */
+.sidebarButton {
+  background: none;
+  border: none;
+  color: #d1e7dd;
+  font-size: 1rem;
+  text-align: left;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebarButton:hover {
+  background-color: #198754;
+  color: #fff;
+  transform: translateX(3px);
+}
+
+/* Scrollbar styling for content area */
+.content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background-color: #198754;
+  border-radius: 10px;
+  border: 2px solid #f4f9f6;
 }
