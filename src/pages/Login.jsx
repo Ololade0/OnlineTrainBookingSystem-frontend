@@ -145,9 +145,37 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../styles/Login.module.css"; // CSS Module
+import styles from "../styles/Login.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+
+/**
+ * Build a correct auth URL regardless of how REACT_APP_API_BASE_URL is set.
+ * Examples that will work:
+ *  - https://yourhost.com                -> + /api/v1/auth/login
+ *  - https://yourhost.com/api/v1         -> + /auth/login
+ *  - https://yourhost.com/api/v1/auth    -> + /login
+ */
+function buildAuthUrl(endpoint = "login") {
+  const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
+  const base = baseRaw.replace(/\/+$/, ""); // trim trailing slash
+
+  if (!base) throw new Error("Missing REACT_APP_API_BASE_URL");
+
+  if (/\/api\/v1\/auth$/.test(base)) return `${base}/${endpoint}`;
+  if (/\/api\/v1$/.test(base)) return `${base}/auth/${endpoint}`;
+  return `${base}/api/v1/auth/${endpoint}`;
+}
+
+/** Safely parse JSON (won't throw on empty/non-JSON bodies). */
+function safeParseJson(text) {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
 
 const Login = () => {
   const navigate = useNavigate();
@@ -158,7 +186,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Auto-fill email if "remember me" was checked before
+  // Pre-fill from "Remember me"
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");
     if (savedEmail) {
@@ -172,113 +200,72 @@ const Login = () => {
       setError("Email and password are required.");
       return false;
     }
+    // Optional: add email regex & min length if you like
     return true;
   };
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_BASE_URL}/api/v1/auth/login`,
-      {
+    try {
+      const url = buildAuthUrl("login");
+      // For debugging the final URL if needed:
+      // console.log("Auth URL:", url);
+
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+      });
+
+      // Read raw text first, then parse safely
+      const raw = await response.text();
+      const data = safeParseJson(raw);
+
+      if (!response.ok) {
+        const normalizedMsg = (data.message || "").toLowerCase();
+
+        const errorMessage =
+          data.error === "user_not_found" || normalizedMsg.includes("user not found")
+            ? "No account exists with this email."
+            : data.error === "invalid_password" || normalizedMsg.includes("invalid password")
+            ? "Incorrect password."
+            : data.error === "account_not_verified" || normalizedMsg.includes("not verified")
+            ? "Please verify your account before logging in."
+            : data.message || `Login failed (status ${response.status}).`;
+
+        // Optional: surface server body in the console for quicker debugging
+        // console.error("Login error:", { status: response.status, data, raw });
+
+        throw new Error(errorMessage);
       }
-    );
 
-    // ✅ Handle possible empty response
-    const text = await response.text();
-    const data = text ? JSON.parse(text) : {};
+      // Accept either "accessToken" (recommended) or "token" (your current backend)
+      const accessToken = data.accessToken ?? data.token;
+      if (!accessToken) {
+        throw new Error("Login succeeded but no token was returned.");
+      }
 
-    if (!response.ok) {
-      const errorMessage =
-        data.error === "user_not_found"
-          ? data.message
-          : data.error === "invalid_password"
-          ? data.message
-          : data.error === "account_not_verified"
-          ? data.message
-          : data.message || "Login failed.";
-      throw new Error(errorMessage);
+      localStorage.setItem("accessToken", accessToken);
+
+      if (rememberMe) {
+        localStorage.setItem("rememberEmail", email);
+      } else {
+        localStorage.removeItem("rememberEmail");
+      }
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Something went wrong during login.");
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Store JWT token
-    localStorage.setItem("accessToken", data.accessToken);
-
-    // ✅ Remember me
-    if (rememberMe) {
-      localStorage.setItem("rememberEmail", email);
-    } else {
-      localStorage.removeItem("rememberEmail");
-    }
-
-    navigate("/dashboard");
-  } catch (err) {
-    setError(err.message || "Something went wrong during login.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   if (!validateForm()) return;
-
-  //   setLoading(true);
-
-  //   try {
-  //     const response = await fetch(
-  //       `${process.env.REACT_APP_API_BASE_URL}/api/v1/auth/login`,
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ email, password }),
-  //       }
-  //     );
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       // Map backend error codes to frontend messages
-  //       const errorMessage =
-  //         data.error === "user_not_found"
-  //           ? data.message // "No account exists with this email."
-  //           : data.error === "invalid_password"
-  //           ? data.message // "Incorrect password."
-  //           : data.error === "account_not_verified"
-  //           ? data.message // "Please verify your account before logging in."
-  //           : data.message || "Login failed.";
-  //       throw new Error(errorMessage);
-  //     }
-
-  //     // ✅ Store JWT token
-  //     localStorage.setItem("accessToken", data.accessToken);
-
-  //     // ✅ Remember me logic
-  //     if (rememberMe) {
-  //       localStorage.setItem("rememberEmail", email);
-  //     } else {
-  //       localStorage.removeItem("rememberEmail");
-  //     }
-
-  //     // ✅ Redirect after successful login
-  //     navigate("/dashboard");
-  //   } catch (err) {
-  //     setError(err.message || "Something went wrong during login.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  };
 
   return (
     <div className={styles.pageWrapper}>
@@ -287,16 +274,17 @@ const Login = () => {
       <section className={styles.loginSection}>
         <h1>Login</h1>
         <form className={styles.loginForm} onSubmit={handleLogin}>
-          {/* Email Input */}
+          {/* Email */}
           <label>Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="username"
           />
 
-          {/* Password Input with Show/Hide */}
+          {/* Password */}
           <label>Password</label>
           <div className={styles.passwordWrapper}>
             <input
@@ -304,6 +292,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
             <button
               type="button"
@@ -314,7 +303,7 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Remember Me & Forgot Password */}
+          {/* Options */}
           <div className={styles.options}>
             <label>
               <input
@@ -333,19 +322,15 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={loading}
-          >
+          {/* Submit */}
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && <div className={styles.error}>{error}</div>}
 
-          {/* Signup Link */}
+          {/* Signup */}
           <p className={styles.signupLink}>
             Don't have an account?{" "}
             <span onClick={() => navigate("/register")}>Create one</span>
