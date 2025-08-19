@@ -254,7 +254,7 @@ const Login = () => {
       }
 
       // Redirect based on role
-      if (data.role?.includes("SUPERADMIN")) {
+      if (data.role?.includes("SUPERADMIN_ROLE")) {
         navigate("/dashboard");
       } else {
         navigate("/");
