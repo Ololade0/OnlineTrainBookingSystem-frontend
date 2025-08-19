@@ -127,3 +127,26 @@
   color: #007bff;
   cursor: pointer;
 }
+
+.loader {
+  border: 3px solid #f3f3f3;   /* Light grey */
+  border-top: 3px solid #4caf50; /* Green (matches your theme) */
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.loadingText {
+  vertical-align: middle;
+  font-size: 14px;
+  color: white;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
