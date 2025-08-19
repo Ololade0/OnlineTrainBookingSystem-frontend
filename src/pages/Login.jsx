@@ -259,7 +259,7 @@ const Login = () => {
         localStorage.removeItem("rememberEmail");
       }
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err.message || "Something went wrong during login.");
     } finally {
