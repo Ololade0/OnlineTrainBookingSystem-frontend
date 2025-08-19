@@ -176,56 +176,109 @@ const Login = () => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/api/v1/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Map backend error codes to frontend messages
-        const errorMessage =
-          data.error === "user_not_found"
-            ? data.message // "No account exists with this email."
-            : data.error === "invalid_password"
-            ? data.message // "Incorrect password."
-            : data.error === "account_not_verified"
-            ? data.message // "Please verify your account before logging in."
-            : data.message || "Login failed.";
-        throw new Error(errorMessage);
+  try {
+    const response = await fetch(
+      `${process.env.REACT_APP_API_BASE_URL}/api/v1/auth/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       }
+    );
 
-      // ✅ Store JWT token
-      localStorage.setItem("accessToken", data.accessToken);
+    // ✅ Handle possible empty response
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
 
-      // ✅ Remember me logic
-      if (rememberMe) {
-        localStorage.setItem("rememberEmail", email);
-      } else {
-        localStorage.removeItem("rememberEmail");
-      }
-
-      // ✅ Redirect after successful login
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Something went wrong during login.");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      const errorMessage =
+        data.error === "user_not_found"
+          ? data.message
+          : data.error === "invalid_password"
+          ? data.message
+          : data.error === "account_not_verified"
+          ? data.message
+          : data.message || "Login failed.";
+      throw new Error(errorMessage);
     }
-  };
+
+    // ✅ Store JWT token
+    localStorage.setItem("accessToken", data.accessToken);
+
+    // ✅ Remember me
+    if (rememberMe) {
+      localStorage.setItem("rememberEmail", email);
+    } else {
+      localStorage.removeItem("rememberEmail");
+    }
+
+    navigate("/dashboard");
+  } catch (err) {
+    setError(err.message || "Something went wrong during login.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+
+  //   if (!validateForm()) return;
+
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await fetch(
+  //       `${process.env.REACT_APP_API_BASE_URL}/api/v1/auth/login`,
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ email, password }),
+  //       }
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       // Map backend error codes to frontend messages
+  //       const errorMessage =
+  //         data.error === "user_not_found"
+  //           ? data.message // "No account exists with this email."
+  //           : data.error === "invalid_password"
+  //           ? data.message // "Incorrect password."
+  //           : data.error === "account_not_verified"
+  //           ? data.message // "Please verify your account before logging in."
+  //           : data.message || "Login failed.";
+  //       throw new Error(errorMessage);
+  //     }
+
+  //     // ✅ Store JWT token
+  //     localStorage.setItem("accessToken", data.accessToken);
+
+  //     // ✅ Remember me logic
+  //     if (rememberMe) {
+  //       localStorage.setItem("rememberEmail", email);
+  //     } else {
+  //       localStorage.removeItem("rememberEmail");
+  //     }
+
+  //     // ✅ Redirect after successful login
+  //     navigate("/dashboard");
+  //   } catch (err) {
+  //     setError(err.message || "Something went wrong during login.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className={styles.pageWrapper}>
