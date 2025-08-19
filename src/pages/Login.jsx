@@ -144,7 +144,6 @@
 // export default Login;
 
 
-
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Login.module.css";
@@ -152,29 +151,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { AuthContext } from "../context/AuthContext";
 
-/**
- * Build a correct auth URL regardless of how REACT_APP_API_BASE_URL is set.
- */
-function buildAuthUrl(endpoint = "login") {
-  const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
-  const base = baseRaw.replace(/\/+$/, ""); // trim trailing slash
-
-  if (!base) throw new Error("Missing REACT_APP_API_BASE_URL");
-
-  if (/\/api\/v1\/auth$/.test(base)) return `${base}/${endpoint}`;
-  if (/\/api\/v1$/.test(base)) return `${base}/auth/${endpoint}`;
-  return `${base}/api/v1/auth/${endpoint}`;
-}
-
-/** Safely parse JSON (won’t throw on empty/non-JSON bodies). */
-function safeParseJson(text) {
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
+const API_BASE = process.env.REACT_APP_API_BASE_URL; 
+// 👉 already ends with /api/v1/auth
 
 const Login = () => {
   const navigate = useNavigate();
@@ -187,7 +165,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Pre-fill from "Remember me"
+  // Load remembered email
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");
     if (savedEmail) {
@@ -209,20 +187,16 @@ const Login = () => {
     setError("");
 
     if (!validateForm()) return;
-
     setLoading(true);
 
     try {
-      const url = buildAuthUrl("login");
-
-      const response = await fetch(url, {
+      const response = await fetch(`${API_BASE}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const raw = await response.text();
-      const data = safeParseJson(raw);
+      const data = await response.json();
 
       if (!response.ok) {
         const normalizedMsg = (data.message || "").toLowerCase();
@@ -238,13 +212,10 @@ const Login = () => {
         throw new Error(errorMessage);
       }
 
-      // Accept either "accessToken" (recommended) or "token" (your current backend)
       const accessToken = data.accessToken ?? data.token;
-      if (!accessToken) {
-        throw new Error("Login succeeded but no token was returned.");
-      }
+      if (!accessToken) throw new Error("Login succeeded but no token returned.");
 
-      // Save auth in context (also stores in localStorage)
+      // Save auth in context (and localStorage via AuthContext)
       login(accessToken, data.role?.[0], data.email);
 
       if (rememberMe) {
@@ -273,7 +244,6 @@ const Login = () => {
       <section className={styles.loginSection}>
         <h1>Login</h1>
         <form className={styles.loginForm} onSubmit={handleLogin}>
-          {/* Email */}
           <label>Email</label>
           <input
             type="email"
@@ -283,7 +253,6 @@ const Login = () => {
             autoComplete="username"
           />
 
-          {/* Password */}
           <label>Password</label>
           <div className={styles.passwordWrapper}>
             <input
@@ -302,7 +271,6 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Options */}
           <div className={styles.options}>
             <label>
               <input
@@ -321,15 +289,12 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Submit */}
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* Error */}
           {error && <div className={styles.error}>{error}</div>}
 
-          {/* Signup */}
           <p className={styles.signupLink}>
             Don't have an account?{" "}
             <span onClick={() => navigate("/register")}>Create one</span>
