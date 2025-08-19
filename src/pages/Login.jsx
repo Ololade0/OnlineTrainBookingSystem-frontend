@@ -143,18 +143,17 @@
 
 // export default Login;
 
-import React, { useState, useEffect } from "react";
+
+
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/Login.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { AuthContext } from "../context/AuthContext";
 
 /**
  * Build a correct auth URL regardless of how REACT_APP_API_BASE_URL is set.
- * Examples that will work:
- *  - https://yourhost.com                -> + /api/v1/auth/login
- *  - https://yourhost.com/api/v1         -> + /auth/login
- *  - https://yourhost.com/api/v1/auth    -> + /login
  */
 function buildAuthUrl(endpoint = "login") {
   const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
@@ -167,7 +166,7 @@ function buildAuthUrl(endpoint = "login") {
   return `${base}/api/v1/auth/${endpoint}`;
 }
 
-/** Safely parse JSON (won't throw on empty/non-JSON bodies). */
+/** Safely parse JSON (won’t throw on empty/non-JSON bodies). */
 function safeParseJson(text) {
   if (!text) return {};
   try {
@@ -179,6 +178,8 @@ function safeParseJson(text) {
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -200,7 +201,6 @@ const Login = () => {
       setError("Email and password are required.");
       return false;
     }
-    // Optional: add email regex & min length if you like
     return true;
   };
 
@@ -214,8 +214,6 @@ const Login = () => {
 
     try {
       const url = buildAuthUrl("login");
-      // For debugging the final URL if needed:
-      // console.log("Auth URL:", url);
 
       const response = await fetch(url, {
         method: "POST",
@@ -223,13 +221,11 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      // Read raw text first, then parse safely
       const raw = await response.text();
       const data = safeParseJson(raw);
 
       if (!response.ok) {
         const normalizedMsg = (data.message || "").toLowerCase();
-
         const errorMessage =
           data.error === "user_not_found" || normalizedMsg.includes("user not found")
             ? "No account exists with this email."
@@ -238,9 +234,6 @@ const Login = () => {
             : data.error === "account_not_verified" || normalizedMsg.includes("not verified")
             ? "Please verify your account before logging in."
             : data.message || `Login failed (status ${response.status}).`;
-
-        // Optional: surface server body in the console for quicker debugging
-        // console.error("Login error:", { status: response.status, data, raw });
 
         throw new Error(errorMessage);
       }
@@ -251,7 +244,8 @@ const Login = () => {
         throw new Error("Login succeeded but no token was returned.");
       }
 
-      localStorage.setItem("accessToken", accessToken);
+      // Save auth in context (also stores in localStorage)
+      login(accessToken, data.role?.[0], data.email);
 
       if (rememberMe) {
         localStorage.setItem("rememberEmail", email);
@@ -259,7 +253,12 @@ const Login = () => {
         localStorage.removeItem("rememberEmail");
       }
 
-      navigate("/");
+      // Redirect based on role
+      if (data.role?.includes("SUPERADMIN")) {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError(err.message || "Something went wrong during login.");
     } finally {
