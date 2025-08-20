@@ -1,443 +1,323 @@
-
-
-// import React, { useState, useEffect } from "react";
-// import styles from "../styles/StaffForm.module.css";
-
-// const StaffForm = () => {
-//   const API_BASE = process.env.REACT_APP_API_BASE_URL;
-
-//   const [formData, setFormData] = useState({
-//     firstName: "",
-//     lastName: "",
-//     email: "",
-//     dateOfBirth: "",
-//     phoneNumber: "",
-//     password: "",
-//     confirmPassword: "",
-//     idNumber: "",
-//     gender: "",
-//     identificationType: "",
-//     roleType: "",
-//   });
-
-//   const [roles, setRoles] = useState([]);
-//   const [identificationTypes, setIdentificationTypes] = useState([]);
-//   const [genders, setGenders] = useState([]);
-
-//   // Fetch dropdown data
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const [rolesRes, idTypesRes, gendersRes] = await Promise.all([
-//           fetch(`${API_BASE}/roles/get-all-roles`),
-//           fetch(`${API_BASE}/admin/get-all-identificationTypes`),
-//           fetch(`${API_BASE}/admin/get-all-genders`),
-//         ]);
-
-//         setRoles(await rolesRes.json());
-//         setIdentificationTypes(await idTypesRes.json());
-//         setGenders(await gendersRes.json());
-//       } catch (error) {
-//         console.error("Error fetching dropdown data:", error);
-//       }
-//     };
-
-//     fetchData();
-//   }, [API_BASE]);
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     try {
-//       const res = await fetch(`${API_BASE}/admin/create-staff`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(formData),
-//       });
-
-//       if (res.ok) {
-//         alert("✅ Staff created successfully!");
-//         setFormData({
-//           firstName: "",
-//           lastName: "",
-//           email: "",
-//           dateOfBirth: "",
-//           phoneNumber: "",
-//           password: "",
-//           confirmPassword: "",
-//           idNumber: "",
-//           gender: "",
-//           identificationType: "",
-//           roleType: "",
-//         });
-//       } else {
-//         const errorMsg = await res.text();
-//         alert("❌ Failed to create staff: " + errorMsg);
-//       }
-//     } catch (error) {
-//       console.error("Error submitting form:", error);
-//     }
-//   };
-
-//   return (
-//     <div className={styles.formContainer}>
-//       <h2 className={styles.formTitle}>➕ Add Staff</h2>
-//       <form onSubmit={handleSubmit} className={styles.formGrid}>
-//         <input
-//           type="text"
-//           name="firstName"
-//           placeholder="First Name"
-//           value={formData.firstName}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="text"
-//           name="lastName"
-//           placeholder="Last Name"
-//           value={formData.lastName}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="email"
-//           name="email"
-//           placeholder="Email Address"
-//           value={formData.email}
-//           onChange={handleChange}
-//           required
-//         />
-
-
-//         <input
-//           type="date"
-//           name="dateOfBirth"
-//           value={formData.dateOfBirth}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="text"
-//           name="idNumber"
-//           placeholder="ID Number"
-//           value={formData.idNumber}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="text"
-//           name="phoneNumber"
-//           placeholder="Phone Number"
-//           value={formData.phoneNumber}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="Password"
-//           value={formData.password}
-//           onChange={handleChange}
-//           required
-//         />
-
-//         <input
-//           type="password"
-//           name="confirmPassword"
-//           placeholder="Confirm Password"
-//           value={formData.confirmPassword}
-//           onChange={handleChange}
-//           required
-//         />
-
-//           {/* Gender dropdown */}
-//         <select
-//           name="gender"
-//           value={formData.gender}
-//           onChange={handleChange}
-//           required
-//         >
-//           <option value="">-- Select Gender --</option>
-//           {genders.map((g, idx) => (
-//             <option key={idx} value={g.genderType || g}>
-//               {g.genderType || g}
-//             </option>
-//           ))}
-//         </select>
-//         <select
-//           name="identificationType"
-//           value={formData.identificationType}
-//           onChange={handleChange}
-//           required
-//         >
-//           <option value="">-- Select ID Type --</option>
-//           {identificationTypes.map((type, idx) => (
-//             <option key={idx} value={type.identificationType || type}>
-//               {type.identificationType || type}
-//             </option>
-//           ))}
-//         </select>
-
-//         <select
-//           name="roleType"
-//           value={formData.roleType}
-//           onChange={handleChange}
-//           required
-//         >
-//           <option value="">-- Select Role --</option>
-//           {roles.map((role, idx) => (
-//             <option key={idx} value={role.roleType || role}>
-//               {role.roleType || role}
-//             </option>
-//           ))}
-//         </select>
-
-//         <button type="submit" className={styles.submitButton}>
-//           🚀 Create Staff
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default StaffForm;
-
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 import styles from "../styles/StaffForm.module.css";
-import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const StaffForm = () => {
-  const API_BASE = process.env.REACT_APP_API_BASE_URL;
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
-  const [formData, setFormData] = useState({
+const StaffForm = () => {
+  const { auth } = useAuth();
+  const [roles, setRoles] = useState([]); // ✅ will store array of strings now
+  const [idTypes, setIdTypes] = useState([]);
+  const [genders, setGenders] = useState([]);
+  const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    gender: "",
-    dateOfBirth: "",
-    identificationType: "",
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    gender: "",
+    dateOfBirth: "",
+    identificationType: "",
     idNumber: "",
     roleType: "",
   });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [roles, setRoles] = useState([]);
-  const [identificationTypes, setIdentificationTypes] = useState([]);
-  const [genders, setGenders] = useState([]);
-
-  // Fetch dropdowns
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const headers = { Authorization: `Bearer ${auth.token}` };
         const [rolesRes, idTypesRes, gendersRes] = await Promise.all([
-          fetch(`${API_BASE}/roles/get-all-roles`),
-          fetch(`${API_BASE}/admin/get-all-identificationTypes`),
-          fetch(`${API_BASE}/admin/get-all-genders`),
+          fetch(`${API_BASE}/role/get-all-roles`, { headers }),
+          fetch(`${API_BASE}/admin/get-all-identificationTypes`, { headers }),
+          fetch(`${API_BASE}/admin/get-all-genders`, { headers }),
         ]);
 
-        setRoles(await rolesRes.json());
-        setIdentificationTypes(await idTypesRes.json());
-        setGenders(await gendersRes.json());
-      } catch (error) {
-        console.error("Error fetching dropdown data:", error);
+        if (!rolesRes.ok || !idTypesRes.ok || !gendersRes.ok) {
+          throw new Error("Failed to fetch form options");
+        }
+
+        const rolesData = await rolesRes.json();
+        // ✅ Updated here: API returns array of strings, not objects
+        setRoles(rolesData);
+
+        const idTypesData = await idTypesRes.json();
+        setIdTypes(idTypesData);
+
+        const gendersData = await gendersRes.json();
+        setGenders(gendersData);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        toast.error("Failed to load form options");
       }
     };
 
-    fetchData();
-  }, [API_BASE]);
+    if (auth?.token) fetchData();
+  }, [auth]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!form.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!form.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Invalid email format";
+    if (!form.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+    if (!form.gender) newErrors.gender = "Gender is required";
+    if (!form.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+    if (!form.identificationType) newErrors.identificationType = "ID type is required";
+    if (!form.idNumber.trim()) newErrors.idNumber = "ID number is required";
+    if (!form.roleType) newErrors.roleType = "Role is required";
+    if (!form.password) newErrors.password = "Password is required";
+    else if (form.password.length < 8) newErrors.password = "Password must be at least 8 characters";
+    if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/user/register`, {
+      const res = await fetch(`${API_BASE}/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(data.message || "✅ Account successfully created", {
-          position: "top-right",
-          autoClose: 4000,
-          theme: "colored",
-        });
-
-        // Reset form
-        setFormData({
+        toast.success(data.message || "Staff created successfully!");
+        setForm({
           firstName: "",
           lastName: "",
           email: "",
-          gender: "",
-          dateOfBirth: "",
-          identificationType: "",
           phoneNumber: "",
           password: "",
           confirmPassword: "",
+          gender: "",
+          dateOfBirth: "",
+          identificationType: "",
           idNumber: "",
           roleType: "",
         });
+        setErrors({});
       } else {
-        toast.error(data.message || "❌ Sign-up failed due to an unexpected error.", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        });
+        toast.error(data.message || "Failed to create staff");
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("❌ Network error. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "colored",
-      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className={styles.formContainer}>
-      <h2 className={styles.formTitle}>➕ Add Staff</h2>
+    <div className="form-page">
+      <div className="form-container">
+        <h2 className="form-title">Create Staff</h2>
+        <form onSubmit={handleSubmit} className="form" noValidate>
+          {/* First & Last Name */}
+          <div className="form-row">
+            <div className={`form-group ${errors.firstName ? "error" : ""}`}>
+              <label htmlFor="firstName">First Name</label>
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.firstName ? "firstName-error" : undefined}
+              />
+              {errors.firstName && <span id="firstName-error" className="error-message">{errors.firstName}</span>}
+            </div>
+            <div className={`form-group ${errors.lastName ? "error" : ""}`}>
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.lastName ? "lastName-error" : undefined}
+              />
+              {errors.lastName && <span id="lastName-error" className="error-message">{errors.lastName}</span>}
+            </div>
+          </div>
 
-      <form onSubmit={handleSubmit} className={styles.formGrid}>
-        <input
-          type="text"
-          name="firstName"
-          placeholder="First Name"
-          value={formData.firstName}
-          onChange={handleChange}
-          required
-        />
+          {/* Email */}
+          <div className={`form-group ${errors.email ? "error" : ""}`}>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              aria-describedby={errors.email ? "email-error" : undefined}
+            />
+            {errors.email && <span id="email-error" className="error-message">{errors.email}</span>}
+          </div>
 
-        <input
-          type="text"
-          name="lastName"
-          placeholder="Last Name"
-          value={formData.lastName}
-          onChange={handleChange}
-          required
-        />
+          {/* Phone */}
+          <div className={`form-group ${errors.phoneNumber ? "error" : ""}`}>
+            <label htmlFor="phoneNumber">Phone Number</label>
+            <input
+              id="phoneNumber"
+              type="tel"
+              name="phoneNumber"
+              value={form.phoneNumber}
+              onChange={handleChange}
+              required
+              aria-describedby={errors.phoneNumber ? "phoneNumber-error" : undefined}
+            />
+            {errors.phoneNumber && <span id="phoneNumber-error" className="error-message">{errors.phoneNumber}</span>}
+          </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+          {/* Gender & DOB */}
+          <div className="form-row">
+            <div className={`form-group ${errors.gender ? "error" : ""}`}>
+              <label htmlFor="gender">Gender</label>
+              <select
+                id="gender"
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.gender ? "gender-error" : undefined}
+              >
+                <option value="">-- Select Gender --</option>
+                {genders.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+              {errors.gender && <span id="gender-error" className="error-message">{errors.gender}</span>}
+            </div>
+            <div className={`form-group ${errors.dateOfBirth ? "error" : ""}`}>
+              <label htmlFor="dateOfBirth">Date of Birth</label>
+              <input
+                id="dateOfBirth"
+                type="date"
+                name="dateOfBirth"
+                value={form.dateOfBirth}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
+              />
+              {errors.dateOfBirth && <span id="dateOfBirth-error" className="error-message">{errors.dateOfBirth}</span>}
+            </div>
+          </div>
 
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          required
-        >
-          <option value="">-- Select Gender --</option>
-          {genders.map((g, idx) => (
-            <option key={idx} value={g.genderType || g}>
-              {g.genderType || g}
-            </option>
-          ))}
-        </select>
+          {/* ID Type & Number */}
+          <div className="form-row">
+            <div className={`form-group ${errors.identificationType ? "error" : ""}`}>
+              <label htmlFor="identificationType">ID Type</label>
+              <select
+                id="identificationType"
+                name="identificationType"
+                value={form.identificationType}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.identificationType ? "identificationType-error" : undefined}
+              >
+                <option value="">-- Select ID Type --</option>
+                {idTypes.map((id) => (
+                  <option key={id} value={id}>{id}</option>
+                ))}
+              </select>
+              {errors.identificationType && <span id="identificationType-error" className="error-message">{errors.identificationType}</span>}
+            </div>
+            <div className={`form-group ${errors.idNumber ? "error" : ""}`}>
+              <label htmlFor="idNumber">ID Number</label>
+              <input
+                id="idNumber"
+                type="text"
+                name="idNumber"
+                value={form.idNumber}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.idNumber ? "idNumber-error" : undefined}
+              />
+              {errors.idNumber && <span id="idNumber-error" className="error-message">{errors.idNumber}</span>}
+            </div>
+          </div>
 
-        <input
-          type="date"
-          name="dateOfBirth"
-          value={formData.dateOfBirth}
-          onChange={handleChange}
-          required
-        />
+          {/* ✅ Roles dropdown fixed */}
+          <div className={`form-group ${errors.roleType ? "error" : ""}`}>
+            <label htmlFor="roleType">Role</label>
+            <select
+              id="roleType"
+              name="roleType"
+              value={form.roleType}
+              onChange={handleChange}
+              required
+              aria-describedby={errors.roleType ? "roleType-error" : undefined}
+            >
+              <option value="">-- Select Role --</option>
+              {roles.map((r) => (
+                <option key={r} value={r}>{r}</option> // ✅ plain strings now
+              ))}
+            </select>
+            {errors.roleType && <span id="roleType-error" className="error-message">{errors.roleType}</span>}
+          </div>
 
-        <select
-          name="identificationType"
-          value={formData.identificationType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">-- Select ID Type --</option>
-          {identificationTypes.map((type, idx) => (
-            <option key={idx} value={type.identificationType || type}>
-              {type.identificationType || type}
-            </option>
-          ))}
-        </select>
+          {/* Password & Confirm */}
+          <div className="form-row">
+            <div className={`form-group ${errors.password ? "error" : ""}`}>
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.password ? "password-error" : undefined}
+              />
+              {errors.password && <span id="password-error" className="error-message">{errors.password}</span>}
+            </div>
+            <div className={`form-group ${errors.confirmPassword ? "error" : ""}`}>
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                required
+                aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
+              />
+              {errors.confirmPassword && <span id="confirmPassword-error" className="error-message">{errors.confirmPassword}</span>}
+            </div>
+          </div>
 
-        <input
-          type="text"
-          name="idNumber"
-          placeholder="ID Number"
-          value={formData.idNumber}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="text"
-          name="phoneNumber"
-          placeholder="Phone Number"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
-
-        <select
-          name="roleType"
-          value={formData.roleType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">-- Select Role --</option>
-          {roles.map((role, idx) => (
-            <option key={idx} value={role.roleType || role}>
-              {role.roleType || role}
-            </option>
-          ))}
-        </select>
-
-        <button type="submit" className={styles.submitButton}>
-          🚀 Create Staff
-        </button>
-      </form>
-
-      {/* Toast container for popup notifications */}
-      <ToastContainer />
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Staff"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
