@@ -4,6 +4,7 @@ import styles from "../styles/Dashboard.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import StaffForm from "../components/StaffForm";
+import StationForm from "../components/StationForm";
 
 const Dashboard = () => {
   const [mainContentView, setMainContentView] = useState("overview");
@@ -62,9 +63,18 @@ const Dashboard = () => {
               <li>
                 <button className={styles.sidebarButton}>Trains</button>
               </li>
-              <li>
+                                <li>
+                  <button
+                    className={styles.sidebarButton}
+                    onClick={() => setMainContentView("stations")} // ✅ new view
+                  >
+                    Stations
+                  </button>
+                </li>
+
+              {/* <li>
                 <button className={styles.sidebarButton}>Stations</button>
-              </li>
+              </li> */}
             </ul>
           </nav>
         </aside>
@@ -91,6 +101,7 @@ const Dashboard = () => {
           )}
 
           {mainContentView === "staffForm" && <StaffForm />}
+            {mainContentView === "stations" && <StationForm />}
         </main>
       </div>
 

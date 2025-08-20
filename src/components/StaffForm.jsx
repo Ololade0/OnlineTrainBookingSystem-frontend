@@ -93,7 +93,7 @@ const StaffForm = () => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/user/register`, {
+      const res = await fetch(`${API_BASE}user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
