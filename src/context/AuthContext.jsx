@@ -6,7 +6,9 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(() => {
     const saved = localStorage.getItem("auth");
-    return saved ? JSON.parse(saved) : { token: null, role: null, email: null };
+    return saved
+      ? JSON.parse(saved)
+      : { token: null, roles: [], email: null };
   });
 
   // Keep localStorage in sync
@@ -19,13 +21,13 @@ export const AuthProvider = ({ children }) => {
   }, [auth]);
 
   // Login
-  const login = (token, role, email) => {
-    setAuth({ token, role, email });
+  const login = (token, roles, email) => {
+    setAuth({ token, roles, email }); // roles must be array
   };
 
   // Logout
   const logout = () => {
-    setAuth({ token: null, role: null, email: null });
+    setAuth({ token: null, roles: [], email: null });
   };
 
   return (
@@ -35,7 +37,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Custom hook to use AuthContext
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+// Custom hook
+export const useAuth = () => useContext(AuthContext);

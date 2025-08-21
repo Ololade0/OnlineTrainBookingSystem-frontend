@@ -1,0 +1,118 @@
+/* StaffList.module.css */
+
+/* Page layout */
+.staffListPage {
+  background: #f5f6fa;
+  min-height: 100vh;
+  padding: 3rem 1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.addButton {
+  background: #198754; /* ✅ green */
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.addButton:hover {
+  background: #157347; /* darker green on hover */
+}
+
+.backButton {
+  background: #198754; /* ✅ green */
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.3s;
+}
+
+.backButton:hover {
+  background: #157347; /* darker green on hover */
+}
+
+/* Table wrapper */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  background-color: #fff;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+/* Staff table */
+.staffTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.staffTable th,
+.staffTable td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.staffTable th {
+  background-color: #198754; /* ✅ green header */
+  color: #fff;
+  font-weight: 600;
+}
+
+.staffTable tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.staffTable tbody tr:hover {
+  background-color: #e6f4ea; /* subtle green hover */
+  transition: background 0.3s;
+}
+
+/* Spinner loader */
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+}
+
+.loader::after {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 5px solid #198754; /* green border */
+  border-top: 5px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .staffTable th,
+  .staffTable td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+}

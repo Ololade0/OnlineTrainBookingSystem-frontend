@@ -1,15 +1,128 @@
-// src/pages/Dashboard.jsx
+// // src/pages/Dashboard.jsx
+// import React, { useState } from "react";
+// import styles from "../styles/Dashboard.module.css";
+// import Header from "../components/Header";
+// import Footer from "../components/Footer";
+// import StaffForm from "../components/StaffForm";
+// import StationForm from "../components/StationForm";
+
+// const Dashboard = () => {
+//   const [mainContentView, setMainContentView] = useState("overview");
+
+  
+//   const cards = [
+//     { title: "Staffs", value: 128, color: "#198754" },
+//     { title: "Revenue", value: "$12,540", color: "#0f5132" },
+//     { title: "Bookings", value: 87, color: "#20c997" },
+//     { title: "Feedbacks", value: 23, color: "#4caf50" },
+//   ];
+
+//   return (
+//     <div className={styles.pageWrapper}>
+//       <Header />
+
+//       <div className={styles.dashboard}>
+//         {/* Sidebar */}
+//         <aside className={styles.sidebar}>
+//           <h2>Admin Dashboard</h2>
+//           <nav>
+//             <ul>
+//               <li className={styles.sectionTitle}>Management</li>
+//               <li>
+//                 <button
+//                   className={styles.sidebarButton}
+//                   onClick={() => setMainContentView("overview")}
+//                 >
+//                   Dashboard
+//                 </button>
+//               </li>
+//               <li>
+//                 <button
+//                   className={styles.sidebarButton}
+//                   onClick={() => setMainContentView("staffForm")}
+//                 >
+//                   Staffs
+//                 </button>
+//               </li>
+//               <li>
+//                 <button className={styles.sidebarButton}>Bookings</button>
+//               </li>
+//               <li>
+//                 <button className={styles.sidebarButton}>Reports</button>
+//               </li>
+//               <li>
+//                 <button className={styles.sidebarButton}>Settings</button>
+//               </li>
+//             </ul>
+
+//             <ul>
+//               <li className={styles.sectionTitle}>Operations</li>
+//               <li>
+//                 <button className={styles.sidebarButton}>Schedule</button>
+//               </li>
+//               <li>
+//                 <button className={styles.sidebarButton}>Trains</button>
+//               </li>
+//                                 <li>
+//                   <button
+//                     className={styles.sidebarButton}
+//                     onClick={() => setMainContentView("stations")} // ✅ new view
+//                   >
+//                     Stations
+//                   </button>
+//                 </li>
+
+//               {/* <li>
+//                 <button className={styles.sidebarButton}>Stations</button>
+//               </li> */}
+//             </ul>
+//           </nav>
+//         </aside>
+
+//         {/* Main Content */}
+//         <main className={styles.content}>
+//           {mainContentView === "overview" && (
+//             <>
+//               <h1>Welcome, Super Admin!</h1>
+//               <p>Overview of your platform metrics.</p>
+//               <div className={styles.cards}>
+//                 {cards.map((card, idx) => (
+//                   <div
+//                     key={idx}
+//                     className={styles.card}
+//                     style={{ borderTop: `4px solid ${card.color}` }}
+//                   >
+//                     <h3>{card.title}</h3>
+//                     <p className={styles.cardValue}>{card.value}</p>
+//                   </div>
+//                 ))}
+//               </div>
+//             </>
+//           )}
+
+//           {mainContentView === "staffForm" && <StaffForm />}
+//             {mainContentView === "stations" && <StationForm />}
+//         </main>
+//       </div>
+
+//       <Footer />
+//     </div>
+//   );
+// };
+
+// export default Dashboard;
+
+
 import React, { useState } from "react";
 import styles from "../styles/Dashboard.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import StaffForm from "../components/StaffForm";
+import StaffList from "../components/StaffList";
 import StationForm from "../components/StationForm";
 
 const Dashboard = () => {
   const [mainContentView, setMainContentView] = useState("overview");
 
-  
   const cards = [
     { title: "Staffs", value: 128, color: "#198754" },
     { title: "Revenue", value: "$12,540", color: "#0f5132" },
@@ -22,7 +135,6 @@ const Dashboard = () => {
       <Header />
 
       <div className={styles.dashboard}>
-        {/* Sidebar */}
         <aside className={styles.sidebar}>
           <h2>Admin Dashboard</h2>
           <nav>
@@ -39,7 +151,7 @@ const Dashboard = () => {
               <li>
                 <button
                   className={styles.sidebarButton}
-                  onClick={() => setMainContentView("staffForm")}
+                  onClick={() => setMainContentView("staffs")}
                 >
                   Staffs
                 </button>
@@ -63,23 +175,18 @@ const Dashboard = () => {
               <li>
                 <button className={styles.sidebarButton}>Trains</button>
               </li>
-                                <li>
-                  <button
-                    className={styles.sidebarButton}
-                    onClick={() => setMainContentView("stations")} // ✅ new view
-                  >
-                    Stations
-                  </button>
-                </li>
-
-              {/* <li>
-                <button className={styles.sidebarButton}>Stations</button>
-              </li> */}
+              <li>
+                <button
+                  className={styles.sidebarButton}
+                  onClick={() => setMainContentView("stations")}
+                >
+                  Stations
+                </button>
+              </li>
             </ul>
           </nav>
         </aside>
 
-        {/* Main Content */}
         <main className={styles.content}>
           {mainContentView === "overview" && (
             <>
@@ -100,8 +207,8 @@ const Dashboard = () => {
             </>
           )}
 
-          {mainContentView === "staffForm" && <StaffForm />}
-            {mainContentView === "stations" && <StationForm />}
+          {mainContentView === "staffs" && <StaffList />}
+          {mainContentView === "stations" && <StationForm />}
         </main>
       </div>
 
