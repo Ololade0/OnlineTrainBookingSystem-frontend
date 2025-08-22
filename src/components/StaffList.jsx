@@ -1,228 +1,167 @@
-// // StaffPage.jsx
-// import React, { useEffect, useState } from "react";
-// import { useAuth } from "../context/AuthContext";
-// import { toast } from "react-toastify";
-// import StaffForm from "./StaffForm";
-// import "../styles/StaffList.module.css";
 
-// const API_BASE = process.env.REACT_APP_API_BASE_URL;
-
-// const StaffPage = () => {
-//   const { auth } = useAuth();
-//   const [staffs, setStaffs] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [view, setView] = useState("list"); // "list" or "form"
-
-//   const fetchStaffs = async () => {
-//     if (!auth?.token) return;
-//     setLoading(true);
-//     try {
-//       const res = await fetch(`${API_BASE}/user/getAllNonUserAccounts`, {
-//         headers: { Authorization: `Bearer ${auth.token}` },
-//       });
-//       const data = await res.json();
-//       if (!res.ok) {
-//         toast.error(data?.status?.description || "Access denied");
-//         setStaffs([]);
-//         return;
-//       }
-//       const mappedStaffs = (data.entity || []).map((user) => ({
-//         ...user,
-//         roles: user.roleHashSet?.map((r) => r.roleType) || ["USER_ROLE"],
-//       }));
-//       setStaffs(mappedStaffs);
-//     } catch (err) {
-//       toast.error("Failed to fetch staff list");
-//       setStaffs([]);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchStaffs();
-//   }, [auth]);
-
-//   const handleAddStaffSuccess = () => {
-//     setView("list");
-//     fetchStaffs();
-//   };
-
-//   if (!auth?.token) return <p>Please log in to view this page.</p>;
-
-//   if (view === "form") {
-//     return (
-//       <div className="staffListPage">
-//         <button className="backButton" onClick={() => setView("list")}>
-//           ← Back to Staff List
-//         </button>
-//         <StaffForm onSuccess={handleAddStaffSuccess} />
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="staffListPage">
-//       <div className="headerRow">
-//         <h2>Staff Accounts</h2>
-//         <button className="addButton" onClick={() => setView("form")}>
-//           Add Staff
-//         </button>
-//       </div>
-
-//       {loading ? (
-//         <div className="loader">Loading...</div>
-//       ) : staffs.length === 0 ? (
-//         <p>No staff accounts found.</p>
-//       ) : (
-//         <div className="tableWrapper">
-//           <table className="staffTable">
-//             <thead>
-//               <tr>
-//                 <th>Name</th>
-//                 <th>Email</th>
-//                 <th>Gender</th>
-//                 <th>Phone</th>
-//                 <th>DOB</th>
-//                 <th>ID Number</th>
-//                 <th>Roles</th>
-//                 <th>Verified</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {staffs.map((staff) => (
-//                 <tr key={staff.id}>
-//                   <td>{staff.firstName} {staff.lastName}</td>
-//                   <td>{staff.email}</td>
-//                   <td>{staff.gender}</td>
-//                   <td>{staff.phoneNumber}</td>
-//                   <td>{staff.dateOfBirth}</td>
-//                   <td>{staff.idNumber}</td>
-//                   <td>{staff.roles.join(", ")}</td>
-//                   <td>{staff.verified ? "Yes" : "No"}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default StaffPage;
-// StaffPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import StaffForm from "./StaffForm";
-import styles from "../styles/StaffList.module.css"; // ✅ Use CSS modules
+import styles from "../styles/StaffList.module.css";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
-const StaffPage = () => {
+export default function StaffList() {
   const { auth } = useAuth();
   const [staffs, setStaffs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("list"); // "list" or "form"
+  const [loading, setLoading] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [size] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchStaffs = async () => {
-    if (!auth?.token) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/user/getAllNonUserAccounts`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data?.status?.description || "Access denied");
-        setStaffs([]);
-        return;
+      const response = await fetch(
+        `${API_BASE}/user/getAllNonUserAccounts?page=${page}&size=${size}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.status?.description || "Failed to fetch staffs");
       }
-      const mappedStaffs = (data.entity || []).map((user) => ({
-        ...user,
-        roles: user.roleHashSet?.map((r) => r.roleType) || ["USER_ROLE"],
-      }));
-      setStaffs(mappedStaffs);
-    } catch (err) {
-      toast.error("Failed to fetch staff list");
-      setStaffs([]);
+
+      setStaffs(data.entity?.content || []);
+      setTotalPages(data.entity?.totalPages || 0);
+    } catch (error) {
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStaffs();
-  }, [auth]);
+    if (auth?.token) {
+      fetchStaffs();
+    }
+  }, [auth, page]);
 
-  const handleAddStaffSuccess = () => {
-    setView("list");
-    fetchStaffs();
+  const handleUpdate = (staff) => {
+    toast.info(`Update staff: ${staff.lastName} ${staff.firstName}`);
   };
 
-  if (!auth?.token) return <p>Please log in to view this page.</p>;
+  const handleDelete = (id) => {
+    toast.warning(`Delete staff with ID: ${id}`);
+  };
 
-  // === FORM VIEW ===
-  if (view === "form") {
-    return (
-      <div className={styles.staffListPage}>
-        <button className={styles.backButton} onClick={() => setView("list")}>
-          ← Back to Staff List
-        </button>
-        <StaffForm onSuccess={handleAddStaffSuccess} />
-      </div>
-    );
-  }
-
-  // === STAFF LIST VIEW ===
   return (
-    <div className={styles.staffListPage}>
-      <div className={styles.headerRow}>
-        <h2>Staff Accounts</h2>
-        <button className={styles.addButton} onClick={() => setView("form")}>
-          Add Staff
-        </button>
-      </div>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Staff Accounts</h2>
 
       {loading ? (
-        <div className={styles.loader}>Loading...</div>
+        <div className={styles.loader}>
+          <div className={styles.spinner}></div>
+        </div>
       ) : staffs.length === 0 ? (
-        <p>No staff accounts found.</p>
+        <p className={styles.empty}>No staff found</p>
       ) : (
-        <div className={styles.tableWrapper}>
-          <table className={styles.staffTable}>
+        <>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Full Name</th>
                 <th>Email</th>
-                <th>Gender</th>
                 <th>Phone</th>
-                <th>DOB</th>
-                <th>ID Number</th>
-                <th>Roles</th>
-                <th>Verified</th>
+                <th>Gender</th>
+                <th>Role(s)</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {staffs.map((staff) => (
                 <tr key={staff.id}>
-                  <td>{staff.firstName} {staff.lastName}</td>
+                  <td>{staff.lastName} {staff.firstName}</td>
                   <td>{staff.email}</td>
-                  <td>{staff.gender}</td>
-                  <td>{staff.phoneNumber}</td>
-                  <td>{staff.dateOfBirth}</td>
-                  <td>{staff.idNumber}</td>
-                  <td>{staff.roles.join(", ")}</td>
-                  <td>{staff.verified ? "Yes" : "No"}</td>
+                  <td>{staff.phoneNumber || "-"}</td>
+                  <td>{staff.gender || "-"}</td>
+                  <td>{staff.roleHashSet?.map((r) => r.roleType).join(", ")}</td>
+                  <td>
+                    <div className={styles.actionWrapper} ref={dropdownRef}>
+                      <button
+                        className={styles.actionIcon}
+                        onClick={() =>
+                          setOpenDropdown(openDropdown === staff.id ? null : staff.id)
+                        }
+                      >
+                        ⋮
+                      </button>
+                      {openDropdown === staff.id && (
+                        <div className={styles.actionDropdown}>
+                          <button onClick={() => handleUpdate(staff)}>Update</button>
+                          <button
+                            className={styles.deleteAction}
+                            onClick={() => handleDelete(staff.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+
+          {/* Pagination */}
+          <div className={styles.pagination}>
+            <button
+              disabled={page === 0}
+              onClick={() => setPage((prev) => prev - 1)}
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={page === i ? styles.activePage : ""}
+                onClick={() => setPage(i)}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={page === totalPages - 1}
+              onClick={() => setPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
-};
+}
 
-export default StaffPage;
