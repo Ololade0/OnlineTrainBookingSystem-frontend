@@ -1,5 +1,5 @@
-
-// import React, { useEffect, useState, useRef } from "react";
+// import React, { useEffect, useState, useRef, useCallback } from "react";
+// import { createPortal } from "react-dom";
 // import { useAuth } from "../context/AuthContext";
 // import { toast } from "react-toastify";
 // import styles from "../styles/StaffList.module.css";
@@ -12,30 +12,34 @@
 //   const { auth } = useAuth();
 //   const [staffs, setStaffs] = useState([]);
 //   const [loading, setLoading] = useState(false);
-//   const [openDropdown, setOpenDropdown] = useState(null);
+//   const [openDropdownId, setOpenDropdownId] = useState(null);
+//   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
-//   // Pagination state
 //   const [page, setPage] = useState(0);
 //   const [size] = useState(10);
 //   const [totalPages, setTotalPages] = useState(0);
 
-//   // Toggle between list view and form view
 //   const [showForm, setShowForm] = useState(false);
+//   const dropdownRefs = useRef({});
 
-//   const dropdownRef = useRef(null);
+//   const [selectedUser, setSelectedUser] = useState(null);
+//   const [loadingUser, setLoadingUser] = useState(false); // Added: loading state for user details
 
-//   // Close dropdown when clicking outside
-//   useEffect(() => {
-//     function handleClickOutside(event) {
-//       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-//         setOpenDropdown(null);
-//       }
+
+//   const handleClickOutside = useCallback((event) => {
+//     if (
+//       Object.values(dropdownRefs.current).every(
+//         (el) => el && !el.contains(event.target)
+//       )
+//     ) {
+//       setOpenDropdownId(null);
 //     }
-//     document.addEventListener("mousedown", handleClickOutside);
-//     return () => {
-//       document.removeEventListener("mousedown", handleClickOutside);
-//     };
 //   }, []);
+
+//   useEffect(() => {
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => document.removeEventListener("mousedown", handleClickOutside);
+//   }, [handleClickOutside]);
 
 //   const fetchStaffs = async () => {
 //     setLoading(true);
@@ -43,18 +47,11 @@
 //       const response = await fetch(
 //         `${API_BASE}/user/getAllNonUserAccounts?page=${page}&size=${size}`,
 //         {
-//           headers: {
-//             Authorization: `Bearer ${auth?.token}`,
-//           },
+//           headers: { Authorization: `Bearer ${auth?.token}` },
 //         }
 //       );
-
 //       const data = await response.json();
-
-//       if (!response.ok) {
-//         throw new Error(data.status?.description || "Failed to fetch staffs");
-//       }
-
+//       if (!response.ok) throw new Error(data.status?.description || "Failed to fetch staffs");
 //       setStaffs(data.entity?.content || []);
 //       setTotalPages(data.entity?.totalPages || 0);
 //     } catch (error) {
@@ -64,22 +61,47 @@
 //     }
 //   };
 
-//   useEffect(() => {
-//     if (auth?.token && !showForm) {
-//       fetchStaffs();
-//     }
+// useEffect(() => {
+//     if (auth?.token && !showForm) fetchStaffs();
 //   }, [auth, page, showForm]);
+
+//   // Fetch single user by ID for View modal
+//   const fetchUserById = async (id) => {
+//     setLoadingUser(true);
+//     try {
+//       const response = await fetch(`${API_BASE}/user/${userId}`, {
+//         headers: { Authorization: `Bearer ${auth?.token}` },
+//       });
+//       const data = await response.json();
+//       if (!response.ok) throw new Error(data.message || "Failed to fetch user");
+//       setSelectedUser(data); // Added: store user for modal
+//     } catch (error) {
+//       toast.error(error.message);
+//     } finally {
+//       setLoadingUser(false);
+//     }
+//   };
 
 //   const handleUpdate = (staff) => {
 //     toast.info(`Update staff: ${staff.lastName} ${staff.firstName}`);
+//     setOpenDropdownId(null);
+//   };
+//   const handleView = (staff) => {
+//     fetchUserById(staff.id); // Added: fetch user on view
+//     setOpenDropdownId(null);
 //   };
 
 //   const handleDelete = (id) => {
 //     toast.warning(`Delete staff with ID: ${id}`);
+//     setOpenDropdownId(null);
 //   };
 
-//   // 🔹 NEW: role-based restriction
-//   // Backend sends roles like: ["SUPERADMIN_ROLE"]
+//   const handleDropdownOpen = (id, event) => {
+//     const rect = event.currentTarget.getBoundingClientRect();
+//     setDropdownPosition({ top: rect.bottom + window.scrollY, left: rect.right - 120 });
+//     setOpenDropdownId(openDropdownId === id ? null : id);
+//   };
+
 //   const roles = auth?.roles || [];
 //   if (!roles.includes("SUPERADMIN_ROLE")) {
 //     return (
@@ -89,7 +111,26 @@
 //       </div>
 //     );
 //   }
-//   // 🔹 END of new code
+
+//   const renderPageButtons = () => {
+//     const maxButtons = 5;
+//     let start = Math.max(0, page - 2);
+//     let end = Math.min(totalPages, start + maxButtons);
+//     start = Math.max(0, end - maxButtons);
+
+//     return Array.from({ length: end - start }, (_, i) => {
+//       const pageIndex = start + i;
+//       return (
+//         <button
+//           key={pageIndex}
+//           className={page === pageIndex ? styles.activePage : ""}
+//           onClick={() => setPage(pageIndex)}
+//         >
+//           {pageIndex + 1}
+//         </button>
+//       );
+//     });
+//   };
 
 //   return (
 //     <div className={styles.container}>
@@ -113,6 +154,7 @@
 //               <table className={styles.table}>
 //                 <thead>
 //                   <tr>
+//                     <th>#</th>
 //                     <th>Full Name</th>
 //                     <th>Email</th>
 //                     <th>Phone</th>
@@ -122,88 +164,66 @@
 //                   </tr>
 //                 </thead>
 //                 <tbody>
-//                   {staffs.map((staff) => (
+//                   {staffs.map((staff, index) => (
 //                     <tr key={staff.id}>
+//                       <td>{page * size + index + 1}</td>
 //                       <td>{staff.lastName} {staff.firstName}</td>
 //                       <td>{staff.email}</td>
 //                       <td>{staff.phoneNumber || "-"}</td>
 //                       <td>{staff.gender || "-"}</td>
-//                       <td>{staff.roleHashSet?.map((r) => r.roleType).join(", ")}</td>
+//                       <td>{staff.roleHashSet?.map(r => r.roleType).join(", ") || "-"}</td>
 //                       <td>
-//                         <div className={styles.actionWrapper} ref={dropdownRef}>
-//                           <button
-//                             className={styles.actionIcon}
-//                             onClick={() =>
-//                               setOpenDropdown(openDropdown === staff.id ? null : staff.id)
-//                             }
-//                           >
-//                             ⋮
-//                           </button>
-//                           {openDropdown === staff.id && (
-//                             <div className={styles.actionDropdown}>
-//                               <button onClick={() => handleUpdate(staff)}>Update</button>
-//                               <button
-//                                 className={styles.deleteAction}
-//                                 onClick={() => handleDelete(staff.id)}
-//                               >
-//                                 Delete
-//                               </button>
-//                             </div>
-//                           )}
-//                         </div>
+//                         <button
+//                           className={styles.actionIcon}
+//                           onClick={(e) => handleDropdownOpen(staff.id, e)}
+//                         >
+//                           ⋮
+//                         </button>
 //                       </td>
 //                     </tr>
 //                   ))}
 //                 </tbody>
 //               </table>
 
-//               {/* Pagination */}
-//               <div className={styles.pagination}>
-//                 <button
-//                   disabled={page === 0}
-//                   onClick={() => setPage((prev) => prev - 1)}
-//                 >
-//                   Previous
-//                 </button>
-
-//                 {Array.from({ length: totalPages }, (_, i) => (
-//                   <button
-//                     key={i}
-//                     className={page === i ? styles.activePage : ""}
-//                     onClick={() => setPage(i)}
+//               {/* Portal dropdown */}
+//               {openDropdownId && (() => {
+//                 const staff = staffs.find(s => s.id === openDropdownId);
+//                 return createPortal(
+//                   <div
+//                     className={styles.actionDropdown}
+//                     style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
 //                   >
-//                     {i + 1}
-//                   </button>
-//                 ))}
+//                     <button onClick={() => handleUpdate(staff)}>Update</button>
+//                     <button onClick={() => handleView(staff)}>View</button>
+//                     <button className={styles.deleteAction} onClick={() => handleDelete(staff.id)}>Delete</button>
+//                   </div>,
+//                   document.body
+//                 );
+//               })()}
 
-//                 <button
-//                   disabled={page === totalPages - 1}
-//                   onClick={() => setPage((prev) => prev + 1)}
-//                 >
-//                   Next
-//                 </button>
+//               <div className={styles.pagination}>
+//                 <button disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+//                 {renderPageButtons()}
+//                 <button disabled={page === totalPages - 1 || totalPages === 0} onClick={() => setPage(page + 1)}>Next</button>
 //               </div>
 //             </>
 //           )}
 //         </>
 //       ) : (
-//         <StaffForm
-//           onSuccess={() => {
-//             setShowForm(false);
-//             fetchStaffs();
-//           }}
-//         />
+//         <StaffForm onSuccess={() => { setShowForm(false); fetchStaffs(); }} />
 //       )}
 //     </div>
 //   );
 // }
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import styles from "../styles/StaffList.module.css";
 import "react-toastify/dist/ReactToastify.css";
 import StaffForm from "./StaffForm";
+import UserDetailsModal from "./UserDetailsModal"; // Added: modal component
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -212,6 +232,7 @@ export default function StaffList() {
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -221,40 +242,38 @@ export default function StaffList() {
   // Toggle form
   const [showForm, setShowForm] = useState(false);
 
+  // Selected user for View modal
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(false); // Added: loading state for user details
+
   const dropdownRefs = useRef({});
 
   // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        Object.values(dropdownRefs.current).every(
-          (el) => el && !el.contains(event.target)
-        )
-      ) {
-        setOpenDropdownId(null);
-      }
+  const handleClickOutside = useCallback((event) => {
+    if (
+      Object.values(dropdownRefs.current).every(
+        (el) => el && !el.contains(event.target)
+      )
+    ) {
+      setOpenDropdownId(null);
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [handleClickOutside]);
+
+  // Fetch paginated staff list
   const fetchStaffs = async () => {
     setLoading(true);
     try {
       const response = await fetch(
         `${API_BASE}/user/getAllNonUserAccounts?page=${page}&size=${size}`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${auth?.token}` } }
       );
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.status?.description || "Failed to fetch staffs");
-      }
-
+      if (!response.ok) throw new Error(data.status?.description || "Failed to fetch staffs");
       setStaffs(data.entity?.content || []);
       setTotalPages(data.entity?.totalPages || 0);
     } catch (error) {
@@ -268,16 +287,44 @@ export default function StaffList() {
     if (auth?.token && !showForm) fetchStaffs();
   }, [auth, page, showForm]);
 
+  // Fetch single user by ID for View modal
+  const fetchUserById = async (id) => {
+    setLoadingUser(true);
+    try {
+      const response = await fetch(`${API_BASE}/user/${id}`, {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to fetch user");
+      setSelectedUser(data); // Added: store user for modal
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+
+  // Action handlers
   const handleUpdate = (staff) => {
     toast.info(`Update staff: ${staff.lastName} ${staff.firstName}`);
+    setOpenDropdownId(null); // auto-close dropdown
   };
 
   const handleView = (staff) => {
-    toast.info(`View staff: ${staff.lastName} ${staff.firstName}`);
+    fetchUserById(staff.id); // Added: fetch user on view
+    setOpenDropdownId(null);
   };
 
   const handleDelete = (id) => {
     toast.warning(`Delete staff with ID: ${id}`);
+    setOpenDropdownId(null);
+  };
+
+  // Open dropdown and calculate portal position
+  const handleDropdownOpen = (id, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setDropdownPosition({ top: rect.bottom + window.scrollY, left: rect.right - 120 });
+    setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
   // Role restriction
@@ -291,8 +338,36 @@ export default function StaffList() {
     );
   }
 
+  // Pagination helper
+  const renderPageButtons = () => {
+    const maxButtons = 5;
+    let start = Math.max(0, page - 2);
+    let end = Math.min(totalPages, start + maxButtons);
+    start = Math.max(0, end - maxButtons);
+
+    return Array.from({ length: end - start }, (_, i) => {
+      const pageIndex = start + i;
+      return (
+        <button
+          key={pageIndex}
+          className={page === pageIndex ? styles.activePage : ""}
+          onClick={() => setPage(pageIndex)}
+        >
+          {pageIndex + 1}
+        </button>
+      );
+    });
+  };
+
   return (
     <div className={styles.container}>
+      {/* Added: User Details Modal */}
+      <UserDetailsModal
+        user={selectedUser}
+        loading={loadingUser}
+        onClose={() => setSelectedUser(null)}
+      />
+
       {!showForm ? (
         <>
           <div className={styles.headerRow}>
@@ -330,73 +405,46 @@ export default function StaffList() {
                       <td>{staff.email}</td>
                       <td>{staff.phoneNumber || "-"}</td>
                       <td>{staff.gender || "-"}</td>
-                      <td>{staff.roleHashSet?.map((r) => r.roleType).join(", ")}</td>
+                      <td>{staff.roleHashSet?.map(r => r.roleType).join(", ") || "-"}</td>
                       <td>
-                        <div
-                          className={styles.actionWrapper}
-                          ref={(el) => (dropdownRefs.current[staff.id] = el)}
+                        <button
+                          className={styles.actionIcon}
+                          onClick={(e) => handleDropdownOpen(staff.id, e)}
                         >
-                          <button
-                            className={styles.actionIcon}
-                            onClick={() =>
-                              setOpenDropdownId(openDropdownId === staff.id ? null : staff.id)
-                            }
-                          >
-                            ⋮
-                          </button>
-
-                          {openDropdownId === staff.id && (
-                            <div className={styles.actionDropdown}>
-                              <button onClick={() => handleUpdate(staff)}>Update</button>
-                              <button onClick={() => handleView(staff)}>View</button>
-                              <button
-                                className={styles.deleteAction}
-                                onClick={() => handleDelete(staff.id)}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                          ⋮
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
-              {/* Pagination */}
-              <div className={styles.pagination}>
-                <button disabled={page === 0} onClick={() => setPage(page - 1)}>
-                  Previous
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i}
-                    className={page === i ? styles.activePage : ""}
-                    onClick={() => setPage(i)}
+              {/* Dropdown rendered via portal */}
+              {openDropdownId && (() => {
+                const staff = staffs.find(s => s.id === openDropdownId);
+                return createPortal(
+                  <div
+                    className={styles.actionDropdown}
+                    style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
                   >
-                    {i + 1}
-                  </button>
-                ))}
+                    <button onClick={() => handleUpdate(staff)}>Update</button>
+                    <button onClick={() => handleView(staff)}>View</button>
+                    <button className={styles.deleteAction} onClick={() => handleDelete(staff.id)}>Delete</button>
+                  </div>,
+                  document.body
+                );
+              })()}
 
-                <button
-                  disabled={page === totalPages - 1}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </button>
+              <div className={styles.pagination}>
+                <button disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+                {renderPageButtons()}
+                <button disabled={page === totalPages - 1 || totalPages === 0} onClick={() => setPage(page + 1)}>Next</button>
               </div>
             </>
           )}
         </>
       ) : (
-        <StaffForm
-          onSuccess={() => {
-            setShowForm(false);
-            fetchStaffs();
-          }}
-        />
+        <StaffForm onSuccess={() => { setShowForm(false); fetchStaffs(); }} />
       )}
     </div>
   );
