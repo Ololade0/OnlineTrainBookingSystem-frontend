@@ -4,7 +4,7 @@ import styles from "../styles/Dashboard.module.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import StaffList from "../components/StaffList";
-import StationForm from "../components/StationForm";
+import StationList from "../components/StationList";
 
 const Dashboard = () => {
   const [mainContentView, setMainContentView] = useState("overview");
@@ -94,7 +94,9 @@ const Dashboard = () => {
           )}
 
           {mainContentView === "staffs" && <StaffList />}
-          {mainContentView === "stations" && <StationForm />}
+          {mainContentView === "stations" && <StationList />}
+
+          {/* {mainContentView === "stations" && <StationForm />} */}
         </main>
       </div>
 
