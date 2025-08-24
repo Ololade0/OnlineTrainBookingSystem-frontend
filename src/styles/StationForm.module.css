@@ -1,10 +1,9 @@
-/* src/styles/StationForm.module.css */
-
+/* 
 .formContainer {
-  max-width: 500px;       /* slightly smaller box */
+  max-width: 500px;      
   width: 90%;             
-  margin: 2rem auto;      /* less top/bottom margin */
-  padding: 2rem 1.8rem;   /* reduced padding */
+  margin: 2rem auto;      
+  padding: 2rem 1.8rem;   
   background: #ffffff;
   border-radius: 18px;    
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12); 
@@ -13,9 +12,9 @@
 }
 
 .formTitle {
-  font-size: 1.8rem;      /* moderate title size */
+  font-size: 1.8rem;      
   font-weight: 700;       
-  margin-bottom: 1.5rem;  /* less spacing */
+  margin-bottom: 1.5rem;  
   color: #111;
   text-align: center;
   letter-spacing: 0.5px;
@@ -29,21 +28,23 @@
 .formGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.3rem; /* reduced spacing */
+  margin-bottom: 1.3rem; 
+
 }
 
 .label {
-  font-size: 1rem;       /* moderate size */
+
+  font-size: 1rem;     
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #333;
 }
 
 .input {
-  padding: 0.5rem 0.9rem;      /* reduced vertical padding */
+  padding: 0.5rem 0.9rem;      
   border: 1px solid #ccc;
-  border-radius: 5px;         /* slightly smaller radius */
-  font-size: 0.95rem;          /* slightly smaller font */
+  border-radius: 5px;        
+  font-size: 0.95rem;          
   font-weight: 500;
   width: 100%;
   transition: all 0.25s ease;
@@ -52,7 +53,106 @@
 .input:focus {
   border-color: #16a34a;
   box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25); /* lighter shadow */
+  /* outline: none;
+} */
+
+/* .input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
   outline: none;
+}
+
+.submitButton {
+  padding: 0.9rem 1rem;  
+  background: #16a34a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.submitButton:hover {
+  background: #13803c;
+  box-shadow: 0 5px 16px rgba(22, 163, 74, 0.45);
+}
+
+.submitButton:disabled {
+  background: #94d3a2;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .formContainer {
+    width: 95%;
+    padding: 1.8rem 1.2rem;
+  }
+
+  .formTitle {
+    font-size: 1.5rem;
+  }
+} */
+
+.formContainer {
+  max-width: 500px;
+  width: 90%;
+  margin: 2rem auto;
+  padding: 2rem 1.8rem;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  animation: fadeIn 0.5s ease-in-out;
+  border: 2px solid #16a34a;
+}
+
+.formTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #111;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.3rem;
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.input {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.25s ease;
 }
 
 .input:focus {
@@ -61,8 +161,14 @@
   outline: none;
 }
 
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
 .submitButton {
-  padding: 0.9rem 1rem;  
+  padding: 0.9rem 1rem;
   background: #16a34a;
   color: #fff;
   font-weight: 700;

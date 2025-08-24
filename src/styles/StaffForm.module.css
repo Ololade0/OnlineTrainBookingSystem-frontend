@@ -1,6 +1,4 @@
-/* StaffForm.module.css */
 
-/* Full page background */
 .form-page {
   background-color: #f5f6fa;
   min-height: 100vh;
@@ -11,7 +9,6 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Form container */
 .form-container {
   background-color: #fff;
   padding: 2.5rem;
@@ -21,7 +18,7 @@
   width: 100%;
 }
 
-/* Form title */
+
 .form-title {
   font-size: 1.8rem;
   font-weight: 600;
@@ -30,7 +27,7 @@
   text-align: center;
 }
 
-/* Form layout */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -100,7 +97,7 @@
   cursor: not-allowed;
 }
 
-/* Back button */
+
 .backButton {
   background: #16a34a;
   color: #fff;
