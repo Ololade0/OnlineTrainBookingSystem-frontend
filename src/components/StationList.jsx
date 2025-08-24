@@ -1,6 +1,5 @@
-
 // import React, { useEffect, useState, useRef } from "react";
-// import StationForm from "./StationForm";
+// import { useNavigate } from "react-router-dom";
 // import StationDetailsModal from "./StationDetailsModal";
 // import { toast } from "react-toastify";
 // import { useAuth } from "../context/AuthContext";
@@ -11,16 +10,12 @@
 
 // const StationList = () => {
 //   const { auth } = useAuth();
+//   const navigate = useNavigate();
 //   const [stations, setStations] = useState([]);
 //   const [loading, setLoading] = useState(true);
-//   const [showForm, setShowForm] = useState(false);
-//   const [selectedStation, setSelectedStation] = useState(null); // For edit/view
-
-//   // Pagination
+//   const [selectedStation, setSelectedStation] = useState(null); // For view
 //   const [page, setPage] = useState(0);
 //   const [totalPages, setTotalPages] = useState(0);
-
-//   // Dropdown
 //   const [openDropdownId, setOpenDropdownId] = useState(null);
 //   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
 //   const dropdownTriggerRefs = useRef({});
@@ -53,8 +48,8 @@
 //   }, [auth, page]);
 
 //   const handleEdit = (station) => {
-//     setSelectedStation(station); // Pass station for editing
-//     setShowForm(true);
+//     navigate(`/stations/edit/${station.stationId}`);
+//     setOpenDropdownId(null);
 //   };
 
 //   const handleView = (station) => {
@@ -67,7 +62,7 @@
 //     try {
 //       const res = await fetch(`${API_BASE}/station/delete-station/${stationId}`, {
 //         method: "DELETE",
-//         headers: { Authorization: `Bearer ${auth?.token}` },
+//         headers: { Authorization: `Bearer ${auth.token}` },
 //       });
 //       const data = await res.json();
 //       if (!res.ok) throw new Error(data?.status?.description || "Failed to delete station");
@@ -107,16 +102,18 @@
 //     <div className={styles.container}>
 //       <div className={styles.headerRow}>
 //         <h2 className={styles.title}>Stations</h2>
-//         <button className={styles.addButton} onClick={() => {
-//           setSelectedStation(null); // Clear for new station
-//           setShowForm(true);
-//         }}>
+//         <button
+//           className={styles.addButton}
+//           onClick={() => navigate("/stations/new")}
+//         >
 //           + Add Station
 //         </button>
 //       </div>
 
 //       {loading ? (
-//         <div className={styles.loader}><div className={styles.spinner}></div></div>
+//         <div className={styles.loader}>
+//           <div className={styles.spinner}></div>
+//         </div>
 //       ) : stations.length === 0 ? (
 //         <p className={styles.empty}>No stations available</p>
 //       ) : (
@@ -142,7 +139,6 @@
 //                     >
 //                       ⋮
 //                     </button>
-
 //                     {openDropdownId === station.stationId &&
 //                       createPortal(
 //                         <div
@@ -152,11 +148,15 @@
 //                         >
 //                           <button onClick={() => handleEdit(station)}>Edit</button>
 //                           <button onClick={() => handleView(station)}>View</button>
-//                           <button className={styles.deleteAction} onClick={() => handleDelete(station.stationId)}>Delete</button>
+//                           <button
+//                             className={styles.deleteAction}
+//                             onClick={() => handleDelete(station.stationId)}
+//                           >
+//                             Delete
+//                           </button>
 //                         </div>,
 //                         document.body
-//                       )
-//                     }
+//                       )}
 //                   </td>
 //                 </tr>
 //               ))}
@@ -164,7 +164,9 @@
 //           </table>
 
 //           <div className={styles.pagination}>
-//             <button disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+//             <button disabled={page === 0} onClick={() => setPage(page - 1)}>
+//               Previous
+//             </button>
 //             {[...Array(totalPages)].map((_, i) => (
 //               <button
 //                 key={i}
@@ -174,23 +176,17 @@
 //                 {i + 1}
 //               </button>
 //             ))}
-//             <button disabled={page + 1 === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+//             <button
+//               disabled={page + 1 === totalPages}
+//               onClick={() => setPage(page + 1)}
+//             >
+//               Next
+//             </button>
 //           </div>
 //         </>
 //       )}
 
-//       {showForm && (
-//         <StationForm
-//           station={selectedStation} // Pass station for edit, null for new
-//           onClose={() => {
-//             setShowForm(false);
-//             setSelectedStation(null);
-//             fetchStations();
-//           }}
-//         />
-//       )}
-
-//       {selectedStation && !showForm && (
+//       {selectedStation && (
 //         <StationDetailsModal
 //           station={selectedStation}
 //           onClose={() => setSelectedStation(null)}
@@ -201,6 +197,7 @@
 // };
 
 // export default StationList;
+
 
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -217,7 +214,7 @@ const StationList = () => {
   const navigate = useNavigate();
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedStation, setSelectedStation] = useState(null); // For view
+  const [selectedStation, setSelectedStation] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -237,7 +234,8 @@ const StationList = () => {
         },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.status?.description || "Failed to fetch stations");
+      if (!res.ok)
+        throw new Error(data?.status?.description || "Failed to fetch stations");
       setStations(data.content || []);
       setTotalPages(data.totalPages || 1);
     } catch (err) {
@@ -264,12 +262,16 @@ const StationList = () => {
   const handleDelete = async (stationId) => {
     if (!window.confirm("Are you sure you want to delete this station?")) return;
     try {
-      const res = await fetch(`${API_BASE}/station/delete-station/${stationId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
+      const res = await fetch(
+        `${API_BASE}/station/delete-station/${stationId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${auth.token}` },
+        }
+      );
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.status?.description || "Failed to delete station");
+      if (!res.ok)
+        throw new Error(data?.status?.description || "Failed to delete station");
       toast.success("Station deleted successfully");
       fetchStations();
     } catch (err) {
@@ -283,7 +285,10 @@ const StationList = () => {
     const rect = e.currentTarget.getBoundingClientRect();
     const dropdownWidth = 120;
     const viewportWidth = window.innerWidth;
-    const left = Math.min(rect.right - dropdownWidth, viewportWidth - dropdownWidth - 10);
+    const left = Math.min(
+      rect.right - dropdownWidth,
+      viewportWidth - dropdownWidth - 10
+    );
     setDropdownPosition({ top: rect.bottom + window.scrollY, left });
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
@@ -292,7 +297,12 @@ const StationList = () => {
     if (!openDropdownId) return;
     const triggerEl = dropdownTriggerRefs.current[openDropdownId];
     const menuEl = dropdownMenuRef.current;
-    if (triggerEl && menuEl && !triggerEl.contains(event.target) && !menuEl.contains(event.target)) {
+    if (
+      triggerEl &&
+      menuEl &&
+      !triggerEl.contains(event.target) &&
+      !menuEl.contains(event.target)
+    ) {
       setOpenDropdownId(null);
     }
   };
@@ -337,7 +347,9 @@ const StationList = () => {
                   <td>{station.stationCode}</td>
                   <td className={styles.actionWrapper}>
                     <button
-                      ref={(el) => (dropdownTriggerRefs.current[station.stationId] = el)}
+                      ref={(el) =>
+                        (dropdownTriggerRefs.current[station.stationId] = el)
+                      }
                       className={styles.actionIcon}
                       onClick={(e) => handleDropdownOpen(station.stationId, e)}
                     >
@@ -348,7 +360,10 @@ const StationList = () => {
                         <div
                           ref={dropdownMenuRef}
                           className={styles.actionDropdown}
-                          style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+                          style={{
+                            top: dropdownPosition.top,
+                            left: dropdownPosition.left,
+                          }}
                         >
                           <button onClick={() => handleEdit(station)}>Edit</button>
                           <button onClick={() => handleView(station)}>View</button>
@@ -390,12 +405,14 @@ const StationList = () => {
         </>
       )}
 
-      {selectedStation && (
-        <StationDetailsModal
-          station={selectedStation}
-          onClose={() => setSelectedStation(null)}
-        />
-      )}
+      {selectedStation &&
+        createPortal(
+          <StationDetailsModal
+            station={selectedStation}
+            onClose={() => setSelectedStation(null)}
+          />,
+          document.body
+        )}
     </div>
   );
 };
