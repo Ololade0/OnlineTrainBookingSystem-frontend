@@ -8,52 +8,46 @@
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.8rem;   /* increased size */
   font-weight: bold;
   color: #059669; /* green-600 */
 }
 
-/* .nav a {
-  margin-left: 1.5rem;
-  text-decoration: none;
-  color: #374151; 
-  font-weight: 500;
-  transition: color 0.2s ease-in-out;
-} */
+.nav {
+  display: flex;
+  align-items: center;
+}
 
 .nav a,
-.nav span,
 .nav button {
   margin-left: 1.5rem;
+  font-weight: 500;
   text-decoration: none;
   color: #374151; /* gray-700 */
-  font-weight: 500;
   transition: color 0.2s ease-in-out;
-}
-
-.nav a:hover {
-  color: #059669;
-}
-
-.logoutBtn {
-  margin-left: 1.5rem;
-  background: #374151; /* red-500 */
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  background: none;   /* remove button bg */
+  border: none;       /* remove border */
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s ease-in-out;
+  font-size: 1rem;
 }
 
-.logoutBtn:hover {
-  background: #dc2626; /* red-600 */
+.nav a:hover,
+.nav button:hover {
+  color: #059669; /* green-600 */
 }
 
-/* .welcomeMsg {
+/* Round avatar for user initial */
+.avatar {
   margin-left: 1.5rem;
-  font-weight: 500;
-  color: #059669;
-} */
-
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #059669; /* green */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: default;
+}
