@@ -13,7 +13,17 @@
   color: #059669; /* green-600 */
 }
 
-.nav a {
+/* .nav a {
+  margin-left: 1.5rem;
+  text-decoration: none;
+  color: #374151; 
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+} */
+
+.nav a,
+.nav span,
+.nav button {
   margin-left: 1.5rem;
   text-decoration: none;
   color: #374151; /* gray-700 */
@@ -24,3 +34,26 @@
 .nav a:hover {
   color: #059669;
 }
+
+.logoutBtn {
+  margin-left: 1.5rem;
+  background: #374151; /* red-500 */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease-in-out;
+}
+
+.logoutBtn:hover {
+  background: #dc2626; /* red-600 */
+}
+
+/* .welcomeMsg {
+  margin-left: 1.5rem;
+  font-weight: 500;
+  color: #059669;
+} */
+
