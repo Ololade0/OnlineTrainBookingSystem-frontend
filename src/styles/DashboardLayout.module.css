@@ -1,0 +1,159 @@
+/* DashboardLayout.module.css */
+
+/* Global page wrapper */
+.pageWrapper {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f9f6;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: #0f5132;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  border-right: 3px solid #198754;
+  transition: width 0.3s;
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #198754;
+  padding-bottom: 0.6rem;
+}
+
+/* Sidebar navigation */
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.sidebar nav li {
+  margin: 0.8rem 0;
+}
+
+.sidebarButton {
+  background: none;
+  border: none;
+  color: #d1e7dd;
+  font-size: 1rem;
+  text-align: left;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebarButton:hover {
+  background-color: #198754;
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #a3d3b3;
+  margin: 1.2rem 0 0.4rem 0;
+  font-weight: bold;
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  padding: 2.5rem 3rem;
+  overflow-y: auto;
+  background-color: #f8fdf9;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Page heading */
+.content h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #0f5132;
+  font-weight: 700;
+}
+
+.content p {
+  color: #3a6351;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Cards grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.8rem;
+}
+
+/* Individual card */
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-top: 5px solid #198754;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.8rem;
+  color: #0f5132;
+  font-weight: 600;
+}
+
+.cardValue {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #198754;
+}
+
+/* Scrollbar for main content */
+.content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background-color: #198754;
+  border-radius: 10px;
+  border: 2px solid #f4f9f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pageWrapper {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    padding: 1rem;
+  }
+  .content {
+    padding: 2rem 1rem;
+  }
+}

@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import StaffForm from "./StaffForm";
 import UserDetailsModal from "./UserDetailsModal";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_BASE_URL
 
 export default function StaffList() {
   const { auth } = useAuth();

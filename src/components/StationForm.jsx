@@ -1,251 +1,288 @@
-
-// import React, { useEffect, useState } from "react";
-// import StationForm from "./StationForm";
-// import styles from "../styles/StationList.module.css";
-// import { toast } from "react-toastify";
-// import { useAuth } from "../context/AuthContext";
-
-// const StationList = () => {
-//   const { auth } = useAuth();
-//   const [stations, setStations] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [showForm, setShowForm] = useState(false);
-//   const [selectedStation, setSelectedStation] = useState(null);
-//   const [activeMenu, setActiveMenu] = useState(null); // 3-dot menu state
-
-//   const fetchStations = async () => {
-//     setLoading(true);
-//     try {
-//       const res = await fetch(`${process.env.REACT_APP_API}/station/get-all-station?page=0&size=10`, {
-//         headers: {
-//           Authorization: `Bearer ${auth.token}`,
-//         },
-//       });
-
-//       if (!res.ok) {
-//         const errorText = await res.text();
-//         throw new Error(errorText || `Failed to fetch stations: ${res.status}`);
-//       }
-
-//       const data = await res.json();
-//       setStations(data.content || []);
-//     } catch (err) {
-//       toast.error(err.message || "Error fetching stations");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchStations();
-//   }, []);
-
-//   const handleMenuToggle = (stationId) => {
-//     setActiveMenu(activeMenu === stationId ? null : stationId);
-//   };
-
-//   const handleEdit = (station) => {
-//     setSelectedStation(station);
-//     setShowForm(true);
-//     setActiveMenu(null);
-//   };
-
-//   const handleDelete = (stationId) => {
-//     toast.info(`Delete station ${stationId} (implement API call)`);
-//     setActiveMenu(null);
-//   };
-
-//   return (
-//     <div>
-//       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
-//         <h2>Stations</h2>
-//         <button className={styles["submit-btn"]} onClick={() => setShowForm(true)}>
-//           Add Station
-//         </button>
-//       </div>
-
-//       {loading ? (
-//         <p>Loading stations...</p>
-//       ) : stations.length === 0 ? (
-//         <p>No stations available</p>
-//       ) : (
-//         <table className={styles.stationTable}>
-//           <thead>
-//             <tr>
-//               <th>Name</th>
-//               <th>Code</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {stations.map((station) => (
-//               <tr key={station.stationId}>
-//                 <td>{station.stationName}</td>
-//                 <td>{station.stationCode}</td>
-//                 <td style={{ position: "relative" }}>
-//                   <button onClick={() => handleMenuToggle(station.stationId)}>⋮</button>
-//                   {activeMenu === station.stationId && (
-//                     <div className={styles.actionMenu}>
-//                       <button onClick={() => handleEdit(station)}>Edit</button>
-//                       <button onClick={() => toast.info(JSON.stringify(station))}>View</button>
-//                       <button onClick={() => handleDelete(station.stationId)}>Delete</button>
-//                     </div>
-//                   )}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       )}
-
-//       {showForm && (
-//         <StationForm
-//           station={selectedStation}
-//           onClose={() => {
-//             setShowForm(false);
-//             setSelectedStation(null);
-//             fetchStations();
-//           }}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default StationList;
-
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import styles from "../styles/StationForm.module.css";
+import { toast } from "react-toastify";
+import styles from "../styles/StaffForm.module.css";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
-const StationForm = () => {
+const StaffForm = ({ onSuccess }) => {
   const { auth } = useAuth();
-  const navigate = useNavigate();
-  const { id } = useParams(); // Get stationId from URL for editing
-  const [formData, setFormData] = useState({
-    stationName: "",
-    stationCode: "",
+  const [roles, setRoles] = useState([]);
+  const [idTypes, setIdTypes] = useState([]);
+  const [genders, setGenders] = useState([]);
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    gender: "",
+    dateOfBirth: "",
+    identificationType: "",
+    idNumber: "",
+    roleType: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [station, setStation] = useState(null);
 
-  // Fetch station data if editing
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load dropdown options
   useEffect(() => {
-    if (id) {
-      const fetchStation = async () => {
-        try {
-          const res = await fetch(`${API_BASE}/station/get-station/${id}`, {
-            headers: {
-              "Content-Type": "application/json",
-              ...(auth?.token && { Authorization: `Bearer ${auth.token}` }),
-            },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data?.status?.description || "Failed to fetch station");
-          setStation(data);
-          setFormData({
-            stationName: data.stationName || "",
-            stationCode: data.stationCode || "",
-          });
-        } catch (err) {
-          toast.error(err.message);
-        }
-      };
-      fetchStation();
-    }
-  }, [id, auth]);
+    const fetchData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${auth.token}` };
+        const [rolesRes, idTypesRes, gendersRes] = await Promise.all([
+          fetch(`${API_BASE}/role/get-all-roles`, { headers }),
+          fetch(`${API_BASE}/admin/get-all-identificationTypes`, { headers }),
+          fetch(`${API_BASE}/admin/get-all-genders`, { headers }),
+        ]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+        if (!rolesRes.ok || !idTypesRes.ok || !gendersRes.ok) {
+          throw new Error("Failed to fetch form options");
+        }
+
+        setRoles(await rolesRes.json());
+        setIdTypes(await idTypesRes.json());
+        setGenders(await gendersRes.json());
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load form options");
+      }
+    };
+    if (auth?.token) fetchData();
+  }, [auth]);
+
+  // Form validation (client-side)
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!form.lastName.trim()) newErrors.lastName = "Last name is required";
+
+    if (!form.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[A-Za-z0-9+_.-]+@(.+)$/.test(form.email))
+      newErrors.email = "Invalid email format";
+
+    if (!form.phoneNumber.trim())
+      newErrors.phoneNumber = "Phone number is required";
+
+    if (!form.gender) newErrors.gender = "Gender is required";
+    if (!form.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+    if (!form.identificationType)
+      newErrors.identificationType = "ID type is required";
+    if (!form.idNumber.trim())
+      newErrors.idNumber = "ID number is required";
+    if (!form.roleType) newErrors.roleType = "Role is required";
+
+    if (!form.password)
+      newErrors.password = "Password is required";
+    else if (
+      !form.password.match(
+        /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$/
+      )
+    ) {
+      newErrors.password =
+        "Password must be 8+ chars, include uppercase, lowercase, number & special char.";
+    }
+
+    if (form.password !== form.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    // Clear previous error on input change
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
+  };
+
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
-      const url = id
-        ? `${API_BASE}/station/update-station/${id}`
-        : `${API_BASE}/station/create-station`;
-      const method = id ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`${API_BASE}/user/register`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(auth?.token && { Authorization: `Bearer ${auth.token}` }),
+          Authorization: `Bearer ${auth.token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.status?.description || "Failed to save station");
-      toast.success(id ? "Station updated successfully" : "Station created successfully");
-      navigate("/stations");
+
+      if (res.ok) {
+        // ✅ Success: reset form & show success toast
+        toast.success(data.status?.description || data.message || "Staff created successfully!");
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          confirmPassword: "",
+          gender: "",
+          dateOfBirth: "",
+          identificationType: "",
+          idNumber: "",
+          roleType: "",
+        });
+        setErrors({});
+        onSuccess?.();
+      } else {
+        // 🔥 Backend error handling
+        console.error("Status:", res.status, "Response:", data);
+
+        // Map field-level errors if backend returns { fieldName: errorMsg }
+        if (typeof data === "object" && !Array.isArray(data)) {
+          const fieldErrors = {};
+          Object.keys(data).forEach((key) => {
+            if (form.hasOwnProperty(key)) {
+              fieldErrors[key] = data[key];
+            }
+          });
+          if (Object.keys(fieldErrors).length > 0) {
+            setErrors(fieldErrors); // ✅ display inline on form fields
+          } else {
+            // Show toast for non-field errors
+            toast.error(data.message || "Failed to create staff");
+          }
+        } else {
+          toast.error("Failed to create staff");
+        }
+      }
     } catch (err) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error("Something went wrong");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className={styles.formContainer}>
-      <h2 className={styles.formTitle}>{id ? "Edit Station" : "Add New Station"}</h2>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="stationName">
-            Station Name
-          </label>
-          <input
-            className={styles.input}
-            type="text"
-            id="stationName"
-            name="stationName"
-            value={formData.stationName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="stationCode">
-            Station Code
-          </label>
-          <input
-            className={styles.input}
-            type="text"
-            id="stationCode"
-            name="stationCode"
-            value={formData.stationCode}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className={styles.formActions}>
-          <button
-            type="button"
-            className={styles.submitButton}
-            onClick={() => navigate("/stations")}
-            disabled={loading}
-          >
-            Cancel
+    <div className={styles["form-page"]}>
+      <div className={styles["form-container"]}>
+        <button
+          type="button"
+          className={styles.backButton}
+          onClick={() => onSuccess?.()}
+        >
+          ← Back
+        </button>
+
+        <h2 className={styles["form-title"]}>Create Staff</h2>
+
+        <form onSubmit={handleSubmit} className={styles.form} noValidate>
+          {/* First & Last Name */}
+          <div className={styles["form-row"]}>
+            <div
+              className={`${styles["form-group"]} ${errors.firstName ? styles.error : ""}`}
+            >
+              <label>First Name</label>
+              <input name="firstName" value={form.firstName} onChange={handleChange} />
+              {errors.firstName && <span className={styles["error-message"]}>{errors.firstName}</span>}
+            </div>
+
+            <div
+              className={`${styles["form-group"]} ${errors.lastName ? styles.error : ""}`}
+            >
+              <label>Last Name</label>
+              <input name="lastName" value={form.lastName} onChange={handleChange} />
+              {errors.lastName && <span className={styles["error-message"]}>{errors.lastName}</span>}
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className={`${styles["form-group"]} ${errors.email ? styles.error : ""}`}>
+            <label>Email</label>
+            <input type="email" name="email" value={form.email} onChange={handleChange} />
+            {errors.email && <span className={styles["error-message"]}>{errors.email}</span>}
+          </div>
+
+          {/* Phone */}
+          <div className={`${styles["form-group"]} ${errors.phoneNumber ? styles.error : ""}`}>
+            <label>Phone Number</label>
+            <input type="tel" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} />
+            {errors.phoneNumber && <span className={styles["error-message"]}>{errors.phoneNumber}</span>}
+          </div>
+
+          {/* Gender & DOB */}
+          <div className={styles["form-row"]}>
+            <div className={`${styles["form-group"]} ${errors.gender ? styles.error : ""}`}>
+              <label>Gender</label>
+              <select name="gender" value={form.gender} onChange={handleChange}>
+                <option value="">-- Select Gender --</option>
+                {genders.map((g) => (<option key={g} value={g}>{g}</option>))}
+              </select>
+              {errors.gender && <span className={styles["error-message"]}>{errors.gender}</span>}
+            </div>
+
+            <div className={`${styles["form-group"]} ${errors.dateOfBirth ? styles.error : ""}`}>
+              <label>Date of Birth</label>
+              <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} />
+              {errors.dateOfBirth && <span className={styles["error-message"]}>{errors.dateOfBirth}</span>}
+            </div>
+          </div>
+
+          {/* ID Type & Number */}
+          <div className={styles["form-row"]}>
+            <div className={`${styles["form-group"]} ${errors.identificationType ? styles.error : ""}`}>
+              <label>ID Type</label>
+              <select name="identificationType" value={form.identificationType} onChange={handleChange}>
+                <option value="">-- Select ID Type --</option>
+                {idTypes.map((id) => (<option key={id} value={id}>{id}</option>))}
+              </select>
+              {errors.identificationType && <span className={styles["error-message"]}>{errors.identificationType}</span>}
+            </div>
+
+            <div className={`${styles["form-group"]} ${errors.idNumber ? styles.error : ""}`}>
+              <label>ID Number</label>
+              <input name="idNumber" value={form.idNumber} onChange={handleChange} />
+              {errors.idNumber && <span className={styles["error-message"]}>{errors.idNumber}</span>}
+            </div>
+          </div>
+
+          {/* Role */}
+          <div className={`${styles["form-group"]} ${errors.roleType ? styles.error : ""}`}>
+            <label>Role</label>
+            <select name="roleType" value={form.roleType} onChange={handleChange}>
+              <option value="">-- Select Role --</option>
+              {roles.map((r) => (<option key={r} value={r}>{r}</option>))}
+            </select>
+            {errors.roleType && <span className={styles["error-message"]}>{errors.roleType}</span>}
+          </div>
+
+          {/* Password & Confirm */}
+          <div className={styles["form-row"]}>
+            <div className={`${styles["form-group"]} ${errors.password ? styles.error : ""}`}>
+              <label>Password</label>
+              <input type="password" name="password" value={form.password} onChange={handleChange} />
+              {errors.password && <span className={styles["error-message"]}>{errors.password}</span>}
+            </div>
+
+            <div className={`${styles["form-group"]} ${errors.confirmPassword ? styles.error : ""}`}>
+              <label>Confirm Password</label>
+              <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} />
+              {errors.confirmPassword && <span className={styles["error-message"]}>{errors.confirmPassword}</span>}
+            </div>
+          </div>
+
+          <button type="submit" className={styles["submit-btn"]} disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Staff"}
           </button>
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={loading}
-          >
-            {loading ? "Saving..." : id ? "Update" : "Create"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default StationForm;
+export default StaffForm;
