@@ -15,6 +15,24 @@ const StationForm = ({ onSuccess }) => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // ✅ Restrict access: Only SUPERADMIN can view this form
+  if (!auth?.token || !auth?.roles?.includes("SUPERADMIN_ROLE")) {
+    return (
+      <div className={styles["form-page"]}>
+        <div className={styles["form-container"]}>
+          <h2 className={styles["form-title"]}>🚫 Not Authorized</h2>
+          <p>You do not have permission to create stations.</p>
+          <button
+            type="button"
+            className={styles.backButton}
+            onClick={() => onSuccess?.()}
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Validation
   const validateForm = () => {
