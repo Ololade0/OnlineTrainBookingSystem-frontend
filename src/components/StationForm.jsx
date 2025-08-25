@@ -40,7 +40,7 @@ const StationForm = ({ onSuccess }) => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/station/create`, {
+      const res = await fetch(`${API_BASE}/station/create-station`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

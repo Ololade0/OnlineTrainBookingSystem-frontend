@@ -2,10 +2,10 @@ import React, { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import styles from "../styles/StationList.module.css"; // changed file name
+import styles from "../styles/StationList.module.css";
 import "react-toastify/dist/ReactToastify.css";
-import StationForm from "./StationForm"; // changed
-import StationDetailsModal from "./StationDetailsModal"; // changed
+import StationForm from "./StationForm";
+import StationDetailsModal from "./StationDetailsModal";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -25,15 +25,27 @@ export default function StationList() {
   const dropdownTriggerRefs = useRef({});
   const dropdownMenuRef = useRef(null);
 
+  // ✅ Fetch stations (switch between search + all)
   const fetchStations = useCallback(async () => {
     setLoading(true);
     try {
-      const queryParams = `query=${encodeURIComponent(searchQuery)}&page=${page}&size=${size}`;
-      const response = await fetch(`${API_BASE}/station/searchStations?${queryParams}`, {
+      let url = "";
+      if (searchQuery.trim()) {
+        // Search mode
+        url = `${API_BASE}/station/searchStations?query=${encodeURIComponent(
+          searchQuery
+        )}&page=${page}&size=${size}`;
+      } else {
+        // All stations mode
+        url = `${API_BASE}/station/get-all-station?page=${page}&size=${size}`;
+      }
+
+      const response = await fetch(url, {
         headers: { Authorization: `Bearer ${auth?.token}` },
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || data.status?.description || "Failed to fetch stations");
+      if (!response.ok)
+        throw new Error(data.message || data.status?.description || "Failed to fetch stations");
 
       setStations(data.content || []);
       setTotalPages(data.totalPages || 0);
@@ -44,40 +56,48 @@ export default function StationList() {
     }
   }, [auth, page, size, searchQuery]);
 
-  const fetchStationById = useCallback(async (id) => {
-    setLoadingStation(true);
-    try {
-      const response = await fetch(`${API_BASE}/station/get-station/${id}`, {
-        headers: { Authorization: `Bearer ${auth?.token}` },
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to fetch station");
-      setSelectedStation(data);
-    } catch (error) {
-      toast.error(error.message);
-      setSelectedStation(null);
-    } finally {
-      setLoadingStation(false);
-    }
-  }, [auth]);
+  // ✅ Fetch single station by ID
+  const fetchStationById = useCallback(
+    async (id) => {
+      setLoadingStation(true);
+      try {
+        const response = await fetch(`${API_BASE}/station/get-station/${id}`, {
+          headers: { Authorization: `Bearer ${auth?.token}` },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to fetch station");
+        setSelectedStation(data);
+      } catch (error) {
+        toast.error(error.message);
+        setSelectedStation(null);
+      } finally {
+        setLoadingStation(false);
+      }
+    },
+    [auth]
+  );
 
-  const handleDelete = useCallback(async (id) => {
-    if (!window.confirm("Are you sure you want to delete this station?")) return;
-    try {
-      const response = await fetch(`${API_BASE}/station/delete-station/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${auth?.token}` },
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to delete station");
-      toast.success(data);
-      fetchStations();
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setOpenDropdownId(null);
-    }
-  }, [auth, fetchStations]);
+  // ✅ Delete station
+  const handleDelete = useCallback(
+    async (id) => {
+      if (!window.confirm("Are you sure you want to delete this station?")) return;
+      try {
+        const response = await fetch(`${API_BASE}/station/delete-station/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${auth?.token}` },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to delete station");
+        toast.success(data);
+        fetchStations();
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setOpenDropdownId(null);
+      }
+    },
+    [auth, fetchStations]
+  );
 
   const handleUpdate = useCallback((station) => {
     setSelectedStation(station);
@@ -85,28 +105,45 @@ export default function StationList() {
     setOpenDropdownId(null);
   }, []);
 
-  const handleView = useCallback((station) => {
-    fetchStationById(station.stationId);
-    setOpenDropdownId(null);
-  }, [fetchStationById]);
-
-  const handleDropdownOpen = useCallback((id, event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const dropdownWidth = 120;
-    const viewportWidth = window.innerWidth;
-    const left = Math.min(rect.right - dropdownWidth, viewportWidth - dropdownWidth - 10);
-    setDropdownPosition({ top: rect.bottom + window.scrollY, left });
-    setOpenDropdownId(openDropdownId === id ? null : id);
-  }, [openDropdownId]);
-
-  const handleClickOutside = useCallback((event) => {
-    if (openDropdownId === null) return;
-    const triggerEl = dropdownTriggerRefs.current[openDropdownId];
-    const menuEl = dropdownMenuRef.current;
-    if (triggerEl && menuEl && !triggerEl.contains(event.target) && !menuEl.contains(event.target)) {
+  const handleView = useCallback(
+    (station) => {
+      fetchStationById(station.stationId);
       setOpenDropdownId(null);
-    }
-  }, [openDropdownId]);
+    },
+    [fetchStationById]
+  );
+
+  const handleDropdownOpen = useCallback(
+    (id, event) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const dropdownWidth = 120;
+      const viewportWidth = window.innerWidth;
+      const left = Math.min(
+        rect.right - dropdownWidth,
+        viewportWidth - dropdownWidth - 10
+      );
+      setDropdownPosition({ top: rect.bottom + window.scrollY, left });
+      setOpenDropdownId(openDropdownId === id ? null : id);
+    },
+    [openDropdownId]
+  );
+
+  const handleClickOutside = useCallback(
+    (event) => {
+      if (openDropdownId === null) return;
+      const triggerEl = dropdownTriggerRefs.current[openDropdownId];
+      const menuEl = dropdownMenuRef.current;
+      if (
+        triggerEl &&
+        menuEl &&
+        !triggerEl.contains(event.target) &&
+        !menuEl.contains(event.target)
+      ) {
+        setOpenDropdownId(null);
+      }
+    },
+    [openDropdownId]
+  );
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -178,7 +215,9 @@ export default function StationList() {
         <>
           <div className={styles.headerRow}>
             <h2 className={styles.title}>Stations</h2>
-            <button className={styles.addButton} onClick={() => setShowForm(true)}>+ Add Station</button>
+            <button className={styles.addButton} onClick={() => setShowForm(true)}>
+              + Add Station
+            </button>
           </div>
 
           <div className={styles.searchForm}>
@@ -193,7 +232,9 @@ export default function StationList() {
           </div>
 
           {loading ? (
-            <div className={styles.loader}><div className={styles.spinner}></div></div>
+            <div className={styles.loader}>
+              <div className={styles.spinner}></div>
+            </div>
           ) : stations.length === 0 ? (
             <p className={styles.empty}>No stations found</p>
           ) : (
@@ -216,7 +257,9 @@ export default function StationList() {
                       <td>
                         <button
                           className={styles.actionIcon}
-                          ref={(el) => (dropdownTriggerRefs.current[station.stationId] = el)}
+                          ref={(el) =>
+                            (dropdownTriggerRefs.current[station.stationId] = el)
+                          }
                           aria-label="Station actions"
                           aria-expanded={openDropdownId === station.stationId}
                           onClick={(e) => handleDropdownOpen(station.stationId, e)}
@@ -231,26 +274,42 @@ export default function StationList() {
 
               {openDropdownId &&
                 (() => {
-                  const station = stations.find((s) => s.stationId === openDropdownId);
+                  const station = stations.find(
+                    (s) => s.stationId === openDropdownId
+                  );
                   return createPortal(
                     <div
                       className={styles.actionDropdown}
                       ref={dropdownMenuRef}
-                      style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+                      style={{
+                        top: dropdownPosition.top,
+                        left: dropdownPosition.left,
+                      }}
                     >
                       <button onClick={() => handleUpdate(station)}>Update</button>
                       <button onClick={() => handleView(station)}>View</button>
-                      <button className={styles.deleteAction} onClick={() => handleDelete(station.stationId)}>Delete</button>
+                      <button
+                        className={styles.deleteAction}
+                        onClick={() => handleDelete(station.stationId)}
+                      >
+                        Delete
+                      </button>
                     </div>,
                     document.body
                   );
-                })()
-              }
+                })()}
 
               <div className={styles.pagination}>
-                <button disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
+                <button disabled={page === 0} onClick={() => setPage(page - 1)}>
+                  Previous
+                </button>
                 {renderPageButtons}
-                <button disabled={page === totalPages - 1 || totalPages === 0} onClick={() => setPage(page + 1)}>Next</button>
+                <button
+                  disabled={page === totalPages - 1 || totalPages === 0}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </button>
               </div>
             </>
           )}
