@@ -7,8 +7,10 @@
 // import Timetable from "./pages/Timetable";
 // import Login from "./pages/Login";
 // import Dashboard from "./pages/Dashboard";
-
+// import Unauthorized from "./pages/Unauthorized"; // 🔹 create this page
 // import { AuthProvider } from "./context/AuthContext";
+// import ProtectedRoute from "./components/ProtectedRoute"; // 🔹 use the updated version
+// import DasbhBoardLayout from "./components/DashboardLayout"; 
 
 // import "./styles/globals.css";
 
@@ -20,7 +22,19 @@
 //           <Route path="/" element={<Home />} />
 //           <Route path="/timetable" element={<Timetable />} />
 //           <Route path="/login" element={<Login />} />
-//           <Route path="/dashboard" element={<Dashboard />} />
+
+//           {/* 🔐 Protected Dashboard Route */}
+//           <Route
+//             path="/dashboard"
+//             element={
+//               <ProtectedRoute requiredRole="SUPERADMIN_ROLE">
+//                 <Dashboard />
+//               </ProtectedRoute>
+//             }
+//           />
+
+//           {/* 🚫 Unauthorized route */}
+//           <Route path="/unauthorized" element={<Unauthorized />} />
 //         </Routes>
 //       </Router>
 
@@ -48,11 +62,11 @@ import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/Home";
 import Timetable from "./pages/Timetable";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Unauthorized from "./pages/Unauthorized"; // 🔹 create this page
+import Unauthorized from "./pages/Unauthorized";
 
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute"; // 🔹 use the updated version
+import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./components/DashboardLayout"; // ✅ fixed import name
 
 import "./styles/globals.css";
 
@@ -70,7 +84,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute requiredRole="SUPERADMIN_ROLE">
-                <Dashboard />
+                <DashboardLayout />
               </ProtectedRoute>
             }
           />

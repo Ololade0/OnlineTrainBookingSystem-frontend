@@ -2,11 +2,11 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
-import styles from "../styles/StationDetailsModal.module.css";
+import styles from "../styles/TrainDetailsModal.module.css";
 
-export default function StationDetailsModal({ station, loading, onClose }) {
+export default function TrainDetailsModal({ train, loading, onClose }) {
   // Only render modal if loading or station exists
-  if (!station && !loading) return null;
+  if (!train && !loading) return null;
 
   return createPortal(
     <div className={styles.overlay} role="dialog" aria-modal="true">
@@ -19,30 +19,30 @@ export default function StationDetailsModal({ station, loading, onClose }) {
           ×
         </button>
         {loading ? (
-          <div className={styles.loader}>Loading station details...</div>
+          <div className={styles.loader}>Loading train details...</div>
         ) : (
           <>
-            <h2>Station Details</h2>
+            <h2>Train Details</h2>
 
             <div className={styles.detailsRow}>
-              <strong>ID:</strong> <span>{station.stationId || "-"}</span>
+              <strong>ID:</strong> <span>{train.trainId || "-"}</span>
             </div>
             <div className={styles.detailsRow}>
-              <strong>Station Name:</strong>{" "}
-              <span>{station.stationName || "-"}</span>
+              <strong>Train Name:</strong>{" "}
+              <span>{train.trainName || "-"}</span>
             </div>
             <div className={styles.detailsRow}>
-              <strong>Station Code:</strong>{" "}
-              <span>{station.stationCode || "-"}</span>
+              <strong>Train Code:</strong>{" "}
+              <span>{train.trainCode || "-"}</span>
             </div>
-            <div className={styles.detailsRow}>
+            {/* <div className={styles.detailsRow}>
               <strong>Created At:</strong>{" "}
               <span>{station.createdAt || "-"}</span>
             </div>
             <div className={styles.detailsRow}>
               <strong>Updated At:</strong>{" "}
               <span>{station.updatedAt || "-"}</span>
-            </div>
+            </div> */}
           </>
         )}
       </div>

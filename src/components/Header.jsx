@@ -37,10 +37,11 @@ const Header = () => {
             </button>
             {/* Avatar Circle */}
             <div className={styles.avatar}>{userInitial}</div>
+            
 
-            {auth.roles?.includes("SUPERADMIN_ROLE") && (
+            {/* {auth.roles?.includes("SUPERADMIN_ROLE") && (
               <a href="/admin/dashboard">Admin Dashboard</a>
-            )}
+            )} */}
 
        
           </>
