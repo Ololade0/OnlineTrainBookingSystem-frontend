@@ -29,6 +29,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
+   color: #1f2937;
 }
 
 .detailsRow {
@@ -41,9 +42,9 @@
   text-align: center;
   font-size: 16px;
 }
-/* UserDetailsModal.module.css */
+
 .overlay {
-  position: fixed; /* must be fixed */
+  position: fixed; 
   top: 0;
   left: 0;
   width: 100%;
@@ -52,5 +53,5 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* high enough to be above everything */
+  z-index: 1000; 
 }

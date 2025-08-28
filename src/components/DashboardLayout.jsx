@@ -1,11 +1,10 @@
-
-
 import React, { useState } from "react";
 import styles from "../styles/DashboardLayout.module.css";
 
 import StaffList from "./StaffList";
 import StationList from "./StationList";
-import TrainList from "./TrainList"
+import TrainList from "./TrainList";
+import ScheduleList from "./ScheduleList"; // Import the ScheduleList component
 import Layout from "./Layout"; // ✅ import your global layout
 
 const overviewCards = [
@@ -57,11 +56,21 @@ const DashboardLayout = () => {
             <ul>
               <li className={styles.sectionTitle}>Operations</li>
               <li>
-                <button className={styles.sidebarButton}>Schedule</button>
+                <button
+                  className={styles.sidebarButton}
+                  onClick={() => setMainContentView("schedules")} // Set view to schedules
+                >
+                  Schedule
+                </button>
               </li>
               <li>
-                {/* <button className={styles.sidebarButton}>Trains</button> */}
-                          <button
+                <button className={styles.sidebarButton}>Seat</button>
+              </li>
+              <li>
+                <button className={styles.sidebarButton}>Prices</button>
+              </li>
+              <li>
+                <button
                   className={styles.sidebarButton}
                   onClick={() => setMainContentView("trains")}
                 >
@@ -103,7 +112,8 @@ const DashboardLayout = () => {
 
           {mainContentView === "staffs" && <StaffList />}
           {mainContentView === "stations" && <StationList />}
-         {mainContentView === "trains" && <TrainList/>}
+          {mainContentView === "trains" && <TrainList />}
+          {mainContentView === "schedules" && <ScheduleList />} {/* Add ScheduleList component */}
         </main>
       </div>
     </Layout>

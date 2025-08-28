@@ -91,6 +91,9 @@ function App() {
 
           {/* 🚫 Unauthorized route */}
           <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          {/* Catch-all → redirect unauthorized users */}
+          <Route path="*" element={<Unauthorized />} />
         </Routes>
       </Router>
 

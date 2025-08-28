@@ -113,7 +113,39 @@
   background: #16a34a;
 }
 
-/* Responsive layout */
+.class-group {
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.addBtn, .removeBtn {
+  background-color: #16a34a;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.removeBtn {
+  background-color: #dc3545;
+  align-self: flex-end;
+  height: fit-content;
+}
+
+.addBtn:hover {
+  background-color: #15803d;
+}
+
+.removeBtn:hover {
+  background-color: #b02a37;
+}
+
+
+
 @media (max-width: 768px) {
   .form-row {
     flex-direction: column;
