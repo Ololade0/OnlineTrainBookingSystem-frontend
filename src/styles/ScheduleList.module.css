@@ -1,121 +1,594 @@
+/* 
 .container {
-  padding: 20px;
-  background: #f9fafb;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 30px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  color: #1f2937;
 }
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+button {
+  font-family: inherit;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
 
 .headerRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
+  font-size: 28px;
+  font-weight: 700;
 }
 
-.filterRow {
+.addButton {
+  background: #059669;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.addButton:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+
+.searchForm {
   display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 40px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-.filterRow input,
-.filterRow select {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.searchForm input,
+.searchForm select,
+.searchForm button {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
 }
 
-.filterRow button {
-  background: #2563eb;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s;
+.searchForm input:focus,
+.searchForm select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
 }
 
-.filterRow button:hover {
-  background: #1e40af;
+.searchForm button {
+  background: #10b981;
+  color: white;
+}
+.searchForm button:hover {
+  background: #059669;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border-radius: 12px;
+  background: white;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.table th,
-.table td {
-  padding: 10px 14px;
+.table th, .table td {
+  padding: 15px 20px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  font-size: 15px;
 }
 
 .table th {
-  background: #f1f5f9;
-  font-weight: 600;
+  background: #3b82f6;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tr:nth-child(even) {
+  background: #f9fafb;
 }
 
 .table tr:hover {
-  background: #f9fafb;
+  background: #e0f2fe;
 }
+
+.actionCell {
+  position: relative;
+}
+
+.actionIcon {
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
+}
+.actionIcon:hover {
+  color: #111827;
+}
+
+
+.actionDropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #e5e7eb;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  z-index: 1000;
+  width: 150px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+.actionDropdown li {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.actionDropdown li:hover {
+  background: #f3f4f6;
+}
+
 
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
+  margin-top: 20px;
+  gap: 5px;
 }
 
 .pagination button {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
+  padding: 8px 14px;
+  background: #e5e7eb;
   border-radius: 6px;
-  cursor: pointer;
-  background: #fff;
+  font-weight: 600;
 }
-
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.pagination button:hover {
+  background: #d1d5db;
 }
-
 .activePage {
-  background: #2563eb !important;
-  color: #fff !important;
+  background: #3b82f6;
+  color: white;
 }
+
 
 .loader {
   display: flex;
   justify-content: center;
-  padding: 20px;
+  padding: 40px;
 }
-
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #2563eb;
+  width: 40px;
+  height: 40px;
+  border: 5px solid #e5e7eb;
+  border-top-color: #3b82f6;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
   animation: spin 1s linear infinite;
 }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+
+.formContainer {
+  max-width: 500px;
+  margin: auto;
+  padding: 25px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.empty {
-  text-align: center;
-  color: #666;
-  margin-top: 20px;
+.scheduleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.scheduleForm input,
+.scheduleForm select {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.scheduleForm input:focus,
+.scheduleForm select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+.formActions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.formActions button {
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+.formActions button:first-child {
+  background: #3b82f6;
+  color: white;
+}
+.formActions button:first-child:hover {
+  background: #2563eb;
+}
+.formActions button:last-child {
+  background: #f3f4f6;
+}
+.formActions button:last-child:hover {
+  background: #e5e7eb;
+}
+
+
+.modalOverlay {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+
+.modalContent {
+  background:white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.modalContent table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+.modalContent table td {
+  padding: 10px 8px;
+  font-size: 14px;
+}
+.modalContent button {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 18px;
+}
+.modalContent button:hover {
+  background: #2563eb;
+}
+
+
+@media (max-width: 768px) {
+  .searchForm {
+    flex-direction: column;
+  }
+  .table th, .table td {
+    padding: 12px 10px;
+  }
+} */
+/* ===== General Container & Typography ===== */
+.container {
+  padding: 30px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  color: #1f2937;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+button {
+  font-family: inherit;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* ===== Header & Action Buttons ===== */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.addButton {
+  background: #10b981; /* green button */
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.addButton:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* ===== Search Form ===== */
+.searchForm {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px; /* more space from table */
+  flex-wrap: wrap;
+}
+
+.searchForm input,
+.searchForm select,
+.searchForm button {
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s;
+  min-width: 200px; /* bigger filter boxes */
+}
+
+.searchForm input:focus,
+.searchForm select:focus {
+  border-color: #10b981;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+}
+
+.searchForm button {
+  background: #3b82f6;
+  color: white;
+}
+.searchForm button:hover {
+  background: #2563eb;
+}
+
+/* ===== Table Styling ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.table th, .table td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.table th {
+  background: #10b981; /* green header */
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.table tr:hover {
+  background: #d1fae5; /* subtle green hover */
+}
+
+.actionCell {
+  position: relative;
+}
+
+.actionIcon {
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
+}
+.actionIcon:hover {
+  color: #111827;
+}
+
+/* ===== Dropdown Actions ===== */
+.actionDropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #e5e7eb;
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  z-index: 1000;
+  width: 160px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+.actionDropdown li {
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.actionDropdown li:hover {
+  background: #f3f4f6;
+}
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 25px;
+  gap: 8px;
+}
+
+.pagination button {
+  padding: 10px 16px;
+  background: #10b981;
+  color: white;
+  border-radius: 6px;
+  font-weight: 600;
+  min-width: 50px;
+  transition: all 0.2s;
+}
+.pagination button:hover {
+  background: #059669;
+}
+.activePage {
+  background: #059669;
+}
+
+/* ===== Loader ===== */
+.loader {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #e5e7eb;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ===== Forms ===== */
+.formContainer {
+  max-width: 550px;
+  margin: auto;
+  padding: 30px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.scheduleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.scheduleForm input,
+.scheduleForm select {
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.scheduleForm input:focus,
+.scheduleForm select:focus {
+  border-color: #10b981;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+}
+
+.formActions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.formActions button {
+  padding: 12px 18px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+.formActions button:first-child {
+  background: #10b981;
+  color: white;
+}
+.formActions button:first-child:hover {
+  background: #059669;
+}
+.formActions button:last-child {
+  background: #f3f4f6;
+}
+.formActions button:last-child:hover {
+  background: #e5e7eb;
+}
+
+/* ===== Modals ===== */
+.modalOverlay {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+
+.modalContent {
+  background:white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.modalContent table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+.modalContent table td {
+  padding: 10px 8px;
+  font-size: 14px;
+}
+.modalContent button {
+  background: #10b981;
+  color: white;
+  padding: 10px 18px;
+}
+.modalContent button:hover {
+  background: #059669;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .searchForm {
+    flex-direction: column;
+  }
+  .table th, .table td {
+    padding: 12px 10px;
+  }
+  .pagination button {
+    min-width: 40px;
+    padding: 8px 12px;
+  }
 }
