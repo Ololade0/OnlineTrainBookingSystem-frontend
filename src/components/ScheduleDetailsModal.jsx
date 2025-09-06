@@ -1,3 +1,31 @@
+// import React from "react";
+// import { createPortal } from "react-dom";
+// import styles from "../styles/ScheduleList.module.css";
+
+// export default function ScheduleDetailsModal({ schedule, onClose }) {
+//   if (!schedule) return null;
+
+//   return createPortal(
+//     <div className={styles.modalOverlay} onClick={onClose}>
+//       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+//         <h2>Schedule Details</h2>
+//         <table>
+//           <tbody>
+//             <tr><td>Route:</td><td>{schedule.route}</td></tr>
+//             <tr><td>Bus:</td><td>{schedule.bus}</td></tr>
+//             <tr><td>Schedule Type:</td><td>{schedule.scheduleType}</td></tr>
+//             <tr><td>Departure:</td><td>{schedule.departureDate} {schedule.departureTime}</td></tr>
+//             <tr><td>Arrival:</td><td>{schedule.arrivalDate} {schedule.arrivalTime}</td></tr>
+//           </tbody>
+//         </table>
+//         <button onClick={onClose}>Close</button>
+//       </div>
+//     </div>,
+//     document.body
+//   );
+// }
+
+
 import React from "react";
 import { createPortal } from "react-dom";
 import styles from "../styles/ScheduleList.module.css";
@@ -11,11 +39,46 @@ export default function ScheduleDetailsModal({ schedule, onClose }) {
         <h2>Schedule Details</h2>
         <table>
           <tbody>
-            <tr><td>Route:</td><td>{schedule.route}</td></tr>
-            <tr><td>Bus:</td><td>{schedule.bus}</td></tr>
-            <tr><td>Schedule Type:</td><td>{schedule.scheduleType}</td></tr>
-            <tr><td>Departure:</td><td>{schedule.departureDate} {schedule.departureTime}</td></tr>
-            <tr><td>Arrival:</td><td>{schedule.arrivalDate} {schedule.arrivalTime}</td></tr>
+            <tr>
+              <td>Route:</td>
+              <td>{schedule.route}</td>
+            </tr>
+            <tr>
+              <td>Train Name:</td>
+              <td>{schedule.trainName}</td>
+            </tr>
+            <tr>
+              <td>Schedule Type:</td>
+              <td>{schedule.scheduleType}</td>
+            </tr>
+            <tr>
+              <td>Departure Station:</td>
+              <td>{schedule.departureStationName}</td>
+            </tr>
+            <tr>
+              <td>Departure:</td>
+              <td>
+                {schedule.departureDate} {schedule.departureTime}
+              </td>
+            </tr>
+            <tr>
+              <td>Arrival Station:</td>
+              <td>{schedule.arrivalStationName}</td>
+            </tr>
+            <tr>
+              <td>Arrival:</td>
+              <td>
+                {schedule.arrivalDate} {schedule.arrivalTime}
+              </td>
+            </tr>
+            <tr>
+              <td>Duration:</td>
+              <td>{schedule.duration}</td>
+            </tr>
+            <tr>
+              <td>Distance:</td>
+              <td>{schedule.distance}</td>
+            </tr>
           </tbody>
         </table>
         <button onClick={onClose}>Close</button>
