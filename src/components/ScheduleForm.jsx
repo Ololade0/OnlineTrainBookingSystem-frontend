@@ -63,7 +63,8 @@ export default function ScheduleForm({ onClose }) {
           ageRes.json(),
         ]);
 
-        console.log("Stations data:", stationsData); 
+        console.log("Trains data:", trainsData); // Debug log for trains
+        console.log("Stations data:", stationsData); // Debug log for stations
         setRoutes(routesData || []);
         setTrains(trainsData?.content || trainsData || []);
         setScheduleTypes(typesData || []);
@@ -79,6 +80,7 @@ export default function ScheduleForm({ onClose }) {
     fetchData();
   }, [auth, isSuperAdmin]);
 
+  // Fetch train classes when a train is selected
   useEffect(() => {
     if (!formData.trainId || ageRanges.length === 0) return;
 
@@ -182,7 +184,7 @@ export default function ScheduleForm({ onClose }) {
               {trains.length > 0 ? (
                 trains.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name || `Train ID: ${t.id}`} {/* Fallback if name is missing */}
+                    {t.trainName || `Train ID: ${t.id}`} {/* Use trainName instead of name */}
                   </option>
                 ))
               ) : (
@@ -208,7 +210,7 @@ export default function ScheduleForm({ onClose }) {
               {stations.length > 0 ? (
                 stations.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name || `Station ID: ${s.id}`} { }
+                    {s.stationName || `Station ID: ${s.id}`} {/* Use stationName instead of name */}
                   </option>
                 ))
               ) : (
@@ -225,7 +227,7 @@ export default function ScheduleForm({ onClose }) {
               {stations.length > 0 ? (
                 stations.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name || `Station ID: ${s.id}`} {/* Fallback if name is missing */}
+                    {s.stationName || `Station ID: ${s.id}`} {/* Use stationName instead of name */}
                   </option>
                 ))
               ) : (
