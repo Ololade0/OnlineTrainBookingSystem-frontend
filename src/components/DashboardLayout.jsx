@@ -58,7 +58,7 @@ const DashboardLayout = () => {
               <li>
                 <button
                   className={styles.sidebarButton}
-                  onClick={() => setMainContentView("schedules")} // Set view to schedules
+                  onClick={() => setMainContentView("schedules")} 
                 >
                   Schedule
                 </button>

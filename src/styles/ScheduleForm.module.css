@@ -1,523 +1,172 @@
-/* .container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  font-family: "Segoe UI", sans-serif;
-}
-
-.title {
-  text-align: center;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: #1b5e20; 
-  margin-bottom: 2rem;
-}
-
-.loading {
-  text-align: center;
-  font-size: 1.2rem;
-  padding: 2rem;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.2rem;
-}
-
-.floatingInput {
-  position: relative;
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.floatingInput input,
-.floatingInput select {
-  padding: 1rem 0.5rem;
-  font-size: 1.1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  color: #333;              
-  outline: none;
-}
-
-.floatingInput select option {
-  color: #333; 
-}
-
-.floatingInput label {
-  position: absolute;
-  top: 1rem;
-  left: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
-  pointer-events: none;
-  transition: 0.2s ease all;
-}
-
-.floatingInput input:focus + label,
-.floatingInput input:not(:placeholder-shown) + label,
-.floatingInput select:focus + label,
-.floatingInput select:not([value=""]) + label {
-  top: -0.7rem;
-  font-size: 0.75rem;
-  color: #1b5e20;
-  background-color: #fff;
-  padding: 0 0.2rem;
-}
-
-
-.priceSection {
-  margin-top: 2rem;
-}
-
-.priceSection h3 {
-  margin-bottom: 1rem;
-  font-weight: 500;
-  color: #1b5e20;
-}
-
-.priceTable {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  overflow-x: auto;
-}
-
-.priceHeader,
-.priceRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.7rem;
-  align-items: center;
-}
-
-.priceHeader {
-  background-color: #e8f5e9;
-  font-weight: 600;
-  color: #1b5e20;
-}
-
-.priceRow:nth-child(even) {
-  background-color: #f1f8e9;
-}
-
-.priceRow input {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #fff; 
-  color: #333;             
-}
-
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.createBtn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #4caf50; 
-  color: #fff;
-  transition: 0.2s ease all;
-}
-
-.createBtn:hover {
-  background-color: #388e3c;
-}
-
-.cancelBtn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.cancelBtn:hover {
-  background-color: #bdbdbd;
-}
-
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .priceRow,
-  .priceHeader {
-    grid-template-columns: 1fr;
-    text-align: left;
-  }
-
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .priceSection {
-  margin-top: 2rem;
-  overflow-x: auto; 
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.priceTable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 600px; 
-}
-
-.priceHeader {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.8rem;
-  background-color: #4caf50;
-  color: #fff;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.priceRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.8rem;
-  align-items: center;
-}
-
-.priceRow:nth-child(even) {
-  background-color: #f1f8e9;
-}
-
-.priceRow:nth-child(odd) {
-  background-color: #ffffff;
-}
-
-.priceRow input {
-  width: 100%;
-  padding: 0.7rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: #333;
-}
-
-.priceRow select {
-  padding: 0.7rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  color: #333;
-  pointer-events: none; 
-}
-
-
-.priceSection::-webkit-scrollbar {
-  height: 8px;
-}
-
-.priceSection::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.priceSection::-webkit-scrollbar-thumb {
-  background: #4caf50;
-  border-radius: 4px;
-}
-
-} */
-
-
 .container {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
   max-width: 900px;
   margin: 2rem auto;
-  padding: 2.5rem;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  font-family: "Segoe UI", sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 .title {
   text-align: center;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: #1b5e20; /* dark green */
-  margin-bottom: 2rem;
-}
-
-.loading {
-  text-align: center;
-  font-size: 1.2rem;
-  padding: 2rem;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
 }
 
 .floatingInput {
-  position: relative;
   display: flex;
-  flex-direction: column-reverse;
-}
-
-.floatingInput input,
-.floatingInput select {
-  padding: 1rem 0.5rem;
-  font-size: 1.1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff; /* white background */
-  color: #333;             /* dark text for visibility */
-  outline: none;
-}
-
-.floatingInput select option {
-  color: #333; /* ensures dropdown items are visible */
+  flex-direction: column;
+  margin-bottom: 1rem;
 }
 
 .floatingInput label {
-  position: absolute;
-  top: 1rem;
-  left: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
-  pointer-events: none;
-  transition: 0.2s ease all;
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 4px;
 }
 
-.floatingInput input:focus + label,
-.floatingInput input:not(:placeholder-shown) + label,
-.floatingInput select:focus + label,
-.floatingInput select:not([value=""]) + label {
-  top: -0.7rem;
-  font-size: 0.75rem;
-  color: #1b5e20;
-  background-color: #fff;
-  padding: 0 0.2rem;
-}
-
-/* Price table */
-.priceSection {
-  margin-top: 2rem;
-  overflow-x: auto; /* horizontal scroll */
+.floatingInput input {
+  padding: 10px 12px;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
+  outline: none;
+  background-color: #fff;
+  color: #000;
+}
+
+.floatingInput select {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  background-color: #fff;
+  color: #000;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+/* Ensure options are styled explicitly */
+.floatingInput select option {
+  background-color: #fff;
+  color: #000;
+  padding: 5px 10px; /* Add padding for better visibility */
+}
+
+/* Handle focus state */
+.floatingInput select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Fallback for older browsers */
+.floatingInput select:-moz-focusring {
+  color: #000;
+  text-shadow: 0 0 0 #000; /* Force text visibility in Firefox */
+}
+
+.priceSection {
+  margin-top: 2rem;
 }
 
 .priceSection h3 {
   margin-bottom: 1rem;
-  font-weight: 500;
-  color: #1b5e20;
+  color: #333;
 }
 
 .priceTable {
   border: 1px solid #ccc;
   border-radius: 8px;
-  overflow-x: auto;
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  min-width: 600px; /* ensures scroll on small screens */
+  overflow: hidden;
 }
 
 .priceHeader,
 .priceRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.7rem;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
   align-items: center;
 }
 
 .priceHeader {
-  background-color: #e8f5e9;
-  font-weight: 600;
-  color: #1b5e20;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.priceRow:nth-child(even) {
-  background-color: #f1f8e9;
+  background-color: #f7f7f7;
+  font-weight: bold;
 }
 
 .priceRow input {
   width: 100%;
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #fff; /* white background */
-  color: #333;             /* dark text */
-}
-
-.priceRow select {
-  padding: 0.7rem;
-  font-size: 1rem;
+  padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  color: #333;
-  pointer-events: none; /* trainClass & ageRange are disabled */
 }
 
-/* No Prices Message */
-.noPrices {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-  border-radius: 8px;
-  text-align: center;
-}
-
-/* Buttons */
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
   margin-top: 2rem;
+  gap: 1rem;
+}
+
+.createBtn,
+.cancelBtn {
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .createBtn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #4caf50; /* green */
+  background-color: #007bff;
   color: #fff;
-  transition: 0.2s ease all;
 }
 
 .createBtn:hover {
-  background-color: #388e3c;
+  background-color: #0056b3;
 }
 
 .cancelBtn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #e0e0e0;
+  background-color: #ccc;
   color: #333;
 }
 
 .cancelBtn:hover {
-  background-color: #bdbdbd;
+  background-color: #999;
 }
 
-/* Scrollbar styling for modern look */
-.priceSection::-webkit-scrollbar {
-  height: 8px;
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #555;
+  padding: 2rem;
 }
 
-.priceSection::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.priceSection::-webkit-scrollbar-thumb {
-  background: #4caf50;
-  border-radius: 4px;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .priceSection {
-    overflow-x: auto;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-
-  .priceTable {
-    width: 100%;
-    min-width: 400px; /* Reduced min-width for better mobile fit */
-  }
-
-  .priceHeader,
-  .priceRow {
-    grid-template-columns: repeat(3, minmax(100px, 1fr)); /* Ensure minimum column width */
-    gap: 0.5rem;
-    padding: 0.8rem;
-  }
-
-  .priceHeader {
-    background-color: #4caf50;
-    color: #fff;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-
-  .priceRow:nth-child(even) {
-    background-color: #f1f8e9;
-  }
-
-  .priceRow:nth-child(odd) {
-    background-color: #ffffff;
-  }
-
-  .priceRow input {
-    width: 100%;
-    max-width: 120px; /* Prevent overly wide inputs */
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    box-sizing: border-box; /* Ensure padding doesn’t cause overflow */
-  }
-
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.noPrices {
+  margin-top: 1rem;
+  color: #555;
+  font-size: 1rem;
 }
