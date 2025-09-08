@@ -40,31 +40,41 @@ export default function ScheduleForm({ onClose }) {
     }
   }, [isSuperAdmin, navigate]);
 
-  // Fetch all filters
+  // Fetch filters
   useEffect(() => {
     if (!auth?.token || !isSuperAdmin) return;
     setLoading(true);
 
     const fetchData = async () => {
       try {
-        const [routesRes, trainsRes, typesRes, stationsRes, ageRes] = await Promise.all([
-          fetch(`${API_BASE}/schedule/get-all-route`, { headers: { Authorization: `Bearer ${auth.token}` } }),
-          fetch(`${API_BASE}/train/get-all-train?page=0&size=1000`, { headers: { Authorization: `Bearer ${auth.token}` } }),
-          fetch(`${API_BASE}/schedule/get-all-scheduleType`, { headers: { Authorization: `Bearer ${auth.token}` } }),
-          fetch(`${API_BASE}/station/get-all-station?page=0&size=1000`, { headers: { Authorization: `Bearer ${auth.token}` } }),
-          fetch(`${API_BASE}/admin/get-all-ageRange`, { headers: { Authorization: `Bearer ${auth.token}` } }),
-        ]);
+        const [routesRes, trainsRes, typesRes, stationsRes, ageRes] =
+          await Promise.all([
+            fetch(`${API_BASE}/schedule/get-all-route`, {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }),
+            fetch(`${API_BASE}/train/get-all-train?page=0&size=1000`, {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }),
+            fetch(`${API_BASE}/schedule/get-all-scheduleType`, {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }),
+            fetch(`${API_BASE}/station/get-all-station?page=0&size=1000`, {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }),
+            fetch(`${API_BASE}/admin/get-all-ageRange`, {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }),
+          ]);
 
-        const [routesData, trainsData, typesData, stationsData, ageData] = await Promise.all([
-          routesRes.json(),
-          trainsRes.json(),
-          typesRes.json(),
-          stationsRes.json(),
-          ageRes.json(),
-        ]);
+        const [routesData, trainsData, typesData, stationsData, ageData] =
+          await Promise.all([
+            routesRes.json(),
+            trainsRes.json(),
+            typesRes.json(),
+            stationsRes.json(),
+            ageRes.json(),
+          ]);
 
-        console.log("Trains data:", trainsData); // Debug log for trains
-        console.log("Stations data:", stationsData); // Debug log for stations
         setRoutes(routesData || []);
         setTrains(trainsData?.content || trainsData || []);
         setScheduleTypes(typesData || []);
@@ -80,59 +90,128 @@ export default function ScheduleForm({ onClose }) {
     fetchData();
   }, [auth, isSuperAdmin]);
 
-  // Fetch train classes when a train is selected
+  // Fetch train classes when train selected
   useEffect(() => {
-    if (!formData.trainId || ageRanges.length === 0) return;
+    if (!formData.trainId) return;
 
     const fetchClasses = async () => {
       try {
-        const res = await fetch(`${API_BASE}/train/${formData.trainId}/classes`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
-        });
+        const res = await fetch(
+          `${API_BASE}/train/${formData.trainId}/classes`,
+          { headers: { Authorization: `Bearer ${auth.token}` } }
+        );
         if (!res.ok) throw new Error("Failed to fetch train classes");
         const classes = await res.json();
-        if (!classes || classes.length === 0) {
-          toast.error("No classes available for this train");
-          setTrainClasses([]);
-          setFormData((prev) => ({ ...prev, prices: [] }));
-          return;
-        }
-
-        setTrainClasses(classes);
-        const prices = classes.flatMap((cls) =>
-          ageRanges.map((age) => ({ trainClass: cls, ageRange: age, price: "" }))
-        );
-        setFormData((prev) => ({ ...prev, prices }));
+        setTrainClasses(classes || []);
       } catch (err) {
         toast.error(err.message);
         setTrainClasses([]);
-        setFormData((prev) => ({ ...prev, prices: [] }));
       }
     };
 
     fetchClasses();
-  }, [formData.trainId, ageRanges, auth.token]);
+  }, [formData.trainId, auth.token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePriceChange = (idx, value) => {
+  // Dynamic price handlers
+  const addPrice = () => {
+    setFormData((prev) => ({
+      ...prev,
+      prices: [...prev.prices, { trainClass: "", ageRange: "", price: "" }],
+    }));
+  };
+
+  const removePrice = (idx) => {
     setFormData((prev) => {
       const newPrices = [...prev.prices];
-      newPrices[idx] = { ...newPrices[idx], price: value };
+      newPrices.splice(idx, 1);
+      return { ...prev, prices: newPrices };
+    });
+  };
+
+  const handlePriceChange = (idx, field, value) => {
+    setFormData((prev) => {
+      const newPrices = [...prev.prices];
+      newPrices[idx] = { ...newPrices[idx], [field]: value };
       return { ...prev, prices: newPrices };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const invalidPrices = formData.prices.filter((p) => !p.price || isNaN(p.price) || Number(p.price) <= 0);
-    if (invalidPrices.length > 0) {
-      toast.error("Please enter valid prices for all classes and age ranges");
+
+    // Required field validation
+    const requiredFields = [
+      "trainId",
+      "route",
+      "scheduleType",
+      "departureStationId",
+      "arrivalStationId",
+      "departureDate",
+      "departureTime",
+      "arrivalDate",
+      "arrivalTime",
+    ];
+
+    for (let field of requiredFields) {
+      if (!formData[field]) {
+        toast.error(
+          `${field.replace(/([A-Z])/g, " $1")} is required`
+        );
+        return;
+      }
+    }
+
+    // Station validation
+    if (formData.departureStationId === formData.arrivalStationId) {
+      toast.error("Departure and arrival station cannot be the same");
       return;
     }
+
+    // Date/time validation
+    const depDateTime = new Date(
+      `${formData.departureDate}T${formData.departureTime}`
+    );
+    const arrDateTime = new Date(
+      `${formData.arrivalDate}T${formData.arrivalTime}`
+    );
+
+    if (depDateTime >= arrDateTime) {
+      toast.error("Departure time must be before arrival time");
+      return;
+    }
+
+    // Price validation
+    const invalidPrices = formData.prices.filter(
+      (p) => !p.trainClass || !p.ageRange || !p.price || Number(p.price) <= 0
+    );
+    if (invalidPrices.length > 0) {
+      toast.error("Please fill all price rows with valid values");
+      return;
+    }
+
+    // Build payload
+    const payload = {
+      trainId: Number(formData.trainId),
+      departureStationId: Number(formData.departureStationId),
+      arrivalStationId: Number(formData.arrivalStationId),
+      departureDate: formData.departureDate,
+      arrivalDate: formData.arrivalDate,
+      departureTime: formData.departureTime,
+      arrivalTime: formData.arrivalTime,
+      scheduleType: formData.scheduleType,
+      route: formData.route,
+      prices: formData.prices.map((p) => ({
+        trainClass: p.trainClass,
+        ageRange: p.ageRange,
+        price: Number(p.price),
+      })),
+    };
+
     try {
       const res = await fetch(`${API_BASE}/schedule/create-schedule`, {
         method: "POST",
@@ -140,10 +219,7 @@ export default function ScheduleForm({ onClose }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          prices: formData.prices.map((p) => ({ ...p, price: Number(p.price) })),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -170,25 +246,45 @@ export default function ScheduleForm({ onClose }) {
         <div className={styles.grid}>
           {/* Route */}
           <div className={styles.floatingInput}>
-            <select name="route" value={formData.route} onChange={handleChange} required>
-              <option value="" disabled>Select Route</option>
-              {routes.map((r, i) => <option key={i} value={r}>{r}</option>)}
+            <select
+              name="route"
+              value={formData.route}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Select Route
+              </option>
+              {routes.map((r, i) => (
+                <option key={i} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
             <label>Route</label>
           </div>
 
           {/* Train */}
           <div className={styles.floatingInput}>
-            <select name="trainId" value={formData.trainId} onChange={handleChange} required>
-              <option value="" disabled>Select Train</option>
+            <select
+              name="trainId"
+              value={formData.trainId}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Select Train
+              </option>
               {trains.length > 0 ? (
                 trains.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.trainName || `Train ID: ${t.id}`} {/* Use trainName instead of name */}
+                    {t.trainName || `Train ID: ${t.id}`}
                   </option>
                 ))
               ) : (
-                <option value="" disabled>No trains available</option>
+                <option value="" disabled>
+                  No trains available
+                </option>
               )}
             </select>
             <label>Train</label>
@@ -196,101 +292,156 @@ export default function ScheduleForm({ onClose }) {
 
           {/* Schedule Type */}
           <div className={styles.floatingInput}>
-            <select name="scheduleType" value={formData.scheduleType} onChange={handleChange} required>
-              <option value="" disabled>Select Schedule Type</option>
-              {scheduleTypes.map((s, i) => <option key={i} value={s}>{s}</option>)}
+            <select
+              name="scheduleType"
+              value={formData.scheduleType}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Select Schedule Type
+              </option>
+              {scheduleTypes.map((s, i) => (
+                <option key={i} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
             <label>Schedule Type</label>
           </div>
 
           {/* Departure Station */}
           <div className={styles.floatingInput}>
-            <select name="departureStationId" value={formData.departureStationId} onChange={handleChange} required>
-              <option value="" disabled>Select Departure Station</option>
-              {stations.length > 0 ? (
-                stations.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.stationName || `Station ID: ${s.id}`} {/* Use stationName instead of name */}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No stations available</option>
-              )}
+            <select
+              name="departureStationId"
+              value={formData.departureStationId}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Select Departure Station
+              </option>
+              {stations.map((s) => (
+                <option key={s.stationId} value={s.stationId}>
+                  {s.stationName || `Station ID: ${s.stationId}`}
+                </option>
+              ))}
             </select>
             <label>Departure Station</label>
           </div>
 
           {/* Arrival Station */}
           <div className={styles.floatingInput}>
-            <select name="arrivalStationId" value={formData.arrivalStationId} onChange={handleChange} required>
-              <option value="" disabled>Select Arrival Station</option>
-              {stations.length > 0 ? (
-                stations.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.stationName || `Station ID: ${s.id}`} {/* Use stationName instead of name */}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No stations available</option>
-              )}
+            <select
+              name="arrivalStationId"
+              value={formData.arrivalStationId}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>
+                Select Arrival Station
+              </option>
+              {stations.map((s) => (
+                <option key={s.stationId} value={s.stationId}>
+                  {s.stationName || `Station ID: ${s.stationId}`}
+                </option>
+              ))}
             </select>
             <label>Arrival Station</label>
           </div>
 
           {/* Dates and Times */}
-          {["departureDate", "departureTime", "arrivalDate", "arrivalTime"].map((field) => (
-            <div key={field} className={styles.floatingInput}>
-              <input
-                type={field.includes("Time") ? "time" : "date"}
-                name={field}
-                value={formData[field]}
-                onChange={handleChange}
-                required
-              />
-              <label>{field.replace(/([A-Z])/g, " $1").trim()}</label>
-            </div>
-          ))}
+          {["departureDate", "departureTime", "arrivalDate", "arrivalTime"].map(
+            (field) => (
+              <div key={field} className={styles.floatingInput}>
+                <input
+                  type={field.includes("Time") ? "time" : "date"}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  required
+                />
+                <label>{field.replace(/([A-Z])/g, " $1").trim()}</label>
+              </div>
+            )
+          )}
         </div>
 
-        {/* Prices */}
-        {formData.prices.length > 0 ? (
-          <div className={styles.priceSection}>
-            <h3>Prices</h3>
-            <div className={styles.priceTable}>
-              <div className={styles.priceHeader}>
-                <div>Class</div>
-                <div>Age Range</div>
-                <div>Price</div>
-              </div>
-              {formData.prices.map((p, idx) => (
-                <div key={idx} className={styles.priceRow}>
-                  <div>{p.trainClass}</div>
-                  <div>{p.ageRange}</div>
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      value={p.price}
-                      onChange={(e) => handlePriceChange(idx, e.target.value)}
-                      required
-                      aria-label={`Price for ${p.trainClass} - ${p.ageRange}`}
-                    />
-                  </div>
-                </div>
-              ))}
+        {/* Prices - Dynamic */}
+        <div className={styles.priceSection}>
+          <h3>Prices</h3>
+          {formData.prices.map((p, idx) => (
+            <div key={idx} className={styles.priceRow}>
+              <select
+                value={p.trainClass}
+                onChange={(e) =>
+                  handlePriceChange(idx, "trainClass", e.target.value)
+                }
+                required
+              >
+                <option value="">Select Class</option>
+                {trainClasses.map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={p.ageRange}
+                onChange={(e) =>
+                  handlePriceChange(idx, "ageRange", e.target.value)
+                }
+                required
+              >
+                <option value="">Select Age Range</option>
+                {ageRanges.map((age) => (
+                  <option key={age} value={age}>
+                    {age}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                placeholder="Price"
+                value={p.price}
+                onChange={(e) =>
+                  handlePriceChange(idx, "price", e.target.value)
+                }
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => removePrice(idx)}
+                className={styles.removeBtn}
+              >
+                –
+              </button>
             </div>
-          </div>
-        ) : (
-          <div className={styles.noPrices}>
-            {formData.trainId
-              ? "No classes available for the selected train."
-              : "Please select a train to set prices."}
-          </div>
-        )}
+          ))}
+
+          <button
+            type="button"
+            onClick={addPrice}
+            className={styles.addBtn}
+          >
+            + Add Price
+          </button>
+        </div>
 
         <div className={styles.actions}>
-          <button type="submit" className={styles.createBtn}>Create Schedule</button>
-          <button type="button" onClick={onClose} className={styles.cancelBtn}>Cancel</button>
+          <button type="submit" className={styles.createBtn}>
+            Create Schedule
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className={styles.cancelBtn}
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>

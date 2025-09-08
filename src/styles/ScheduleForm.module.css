@@ -76,8 +76,9 @@
 }
 
 /* Handle focus state */
-.floatingInput select:focus {
-  border-color: #007bff;
+.floatingInput select:focus,
+.floatingInput input:focus {
+  border-color: #059669;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
@@ -87,6 +88,7 @@
   text-shadow: 0 0 0 #000; /* Force text visibility in Firefox */
 }
 
+/* === PRICES SECTION === */
 .priceSection {
   margin-top: 2rem;
 }
@@ -96,33 +98,54 @@
   color: #333;
 }
 
-.priceTable {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.priceHeader,
 .priceRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
   align-items: center;
 }
 
-.priceHeader {
-  background-color: #f7f7f7;
-  font-weight: bold;
-}
-
+.priceRow select,
 .priceRow input {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 1rem;
   border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
+.addBtn {
+  margin-top: 0.5rem;
+  background: #059669;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.addBtn:hover {
+  background: #0056b3;
+}
+
+.removeBtn {
+  background: #059669;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.removeBtn:hover {
+  background: #a71d2a;
+}
+
+/* === ACTION BUTTONS === */
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -141,12 +164,12 @@
 }
 
 .createBtn {
-  background-color: #007bff;
+  background-color: #059669;
   color: #fff;
 }
 
 .createBtn:hover {
-  background-color: #0056b3;
+  background-color: #059669;
 }
 
 .cancelBtn {
@@ -158,6 +181,7 @@
   background-color: #999;
 }
 
+/* === MISC === */
 .loading {
   text-align: center;
   font-size: 1.2rem;
