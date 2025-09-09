@@ -25,19 +25,17 @@ export default function StationList() {
   const dropdownTriggerRefs = useRef({});
   const dropdownMenuRef = useRef(null);
 
-  // ✅ Fetch stations (switch between search + all)
-  const fetchStations = useCallback(async () => {
+  // ✅ Fetch stations
+  const fetchStations = useCallback(async (pageNumber = page) => {
     setLoading(true);
     try {
       let url = "";
       if (searchQuery.trim()) {
-        // Search mode
         url = `${API_BASE}/station/searchStations?query=${encodeURIComponent(
           searchQuery
-        )}&page=${page}&size=${size}`;
+        )}&page=${pageNumber}&size=${size}`;
       } else {
-        // All stations mode
-        url = `${API_BASE}/station/get-all-station?page=${page}&size=${size}`;
+        url = `${API_BASE}/station/get-all-station?page=${pageNumber}&size=${size}`;
       }
 
       const response = await fetch(url, {
@@ -49,6 +47,7 @@ export default function StationList() {
 
       setStations(data.content || []);
       setTotalPages(data.totalPages || 0);
+      setPage(pageNumber);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -56,7 +55,7 @@ export default function StationList() {
     }
   }, [auth, page, size, searchQuery]);
 
-  // ✅ Fetch single station by ID
+  // ✅ Fetch single station
   const fetchStationById = useCallback(
     async (id) => {
       setLoadingStation(true);
@@ -88,8 +87,8 @@ export default function StationList() {
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Failed to delete station");
-        toast.success(data);
-        fetchStations();
+        toast.success(data.message || "Station deleted successfully!");
+        fetchStations(0); // refresh first page after delete
       } catch (error) {
         toast.error(error.message);
       } finally {
@@ -165,12 +164,12 @@ export default function StationList() {
   }, [handleClickOutside]);
 
   useEffect(() => {
-    if (auth?.token && !showForm) fetchStations();
+    if (auth?.token && !showForm) fetchStations(page);
   }, [auth, page, showForm, fetchStations]);
 
   const handleSearch = useCallback(() => {
     setPage(0);
-    fetchStations();
+    fetchStations(0);
   }, [fetchStations]);
 
   const roles = auth?.roles || [];
@@ -320,7 +319,8 @@ export default function StationList() {
           onSuccess={() => {
             setShowForm(false);
             setSelectedStation(null);
-            fetchStations();
+            setPage(0);
+            fetchStations(0); // ensures new station appears on first page
           }}
         />
       )}

@@ -1,4 +1,4 @@
-
+/* 
 .form-page {
   background-color: #f5f6fa;
   min-height: 100vh;
@@ -113,9 +113,85 @@
   background: #16a34a;
 }
 
-/* Responsive layout */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .form-row {
     flex-direction: column;
   }
+}  */
+.formContainer {
+  max-width: 450px;
+  width: 90%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.form input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.buttonGroup button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.buttonGroup button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.buttonGroup button:not(.cancel) {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.buttonGroup button:not(.cancel):hover {
+  background-color: #45a049;
+}
+
+.cancel {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.cancel:hover {
+  background-color: #e53935;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
 }

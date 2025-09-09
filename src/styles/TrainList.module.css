@@ -222,3 +222,7 @@
   padding: 50px;
   color: #dc3545;
 }
+.highlightRow {
+  background-color: #fff4c2; /* light yellow */
+  transition: background-color 1.5s ease;
+}
