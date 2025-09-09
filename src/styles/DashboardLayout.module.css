@@ -145,6 +145,7 @@
 @media (max-width: 768px) {
   .pageWrapper {
     flex-direction: column;
+    color: #000;
   }
   .sidebar {
     width: 100%;

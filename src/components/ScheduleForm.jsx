@@ -236,9 +236,14 @@ export default function ScheduleForm({ onClose }) {
       toast.error(err.message);
     }
   };
-
-  if (loading) return <div className={styles.loading}>Loading filters...</div>;
-
+  if (loading) {
+  return (
+    <div className={styles.loading}>
+      <div className={styles.spinner}></div>
+      <p>Loading...</p>
+    </div>
+  );
+}
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Create Schedule</h2>

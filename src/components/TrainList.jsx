@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
@@ -6,186 +5,202 @@ import { toast } from "react-toastify";
 import styles from "../styles/TrainList.module.css";
 import "react-toastify/dist/ReactToastify.css";
 import TrainForm from "./TrainForm";
+import TrainUpdateForm from "./TrainUpdateForm";
 import TrainDetailsModal from "./TrainDetailsModal";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 export default function TrainList() {
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
 
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // Actions dropdown state
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
-
-  // Classes dropdown state
   const [openClassesId, setOpenClassesId] = useState(null);
   const [classesDropdownPosition, setClassesDropdownPosition] = useState({ top: 0, left: 0 });
-
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
-  const [showForm, setShowForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [updateTrain, setUpdateTrain] = useState(null);
   const [selectedTrain, setSelectedTrain] = useState(null);
   const [loadingTrain, setLoadingTrain] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // separate refs for action & classes triggers + menus
   const actionTriggerRefs = useRef({});
   const classesTriggerRefs = useRef({});
   const actionMenuRef = useRef(null);
   const classesMenuRef = useRef(null);
 
-  // ✅ Fetch trains (switch between search + all)
+  // --- Utility to handle backend errors ---
+  const handleBackendError = useCallback(
+    (res, data) => {
+      const errorMessage =
+        data?.message || data?.status?.description || data?.error || "Unexpected error";
+
+      toast.error(errorMessage);
+
+      if (res.status === 401) {
+        logout();
+        window.location.href = "/login";
+      }
+      return errorMessage;
+    },
+    [logout]
+  );
+
+  // --- Fetch all trains ---
   const fetchTrain = useCallback(async () => {
     setLoading(true);
     try {
-      let url = "";
-      if (searchQuery.trim()) {
-        url = `${API_BASE}/train/searchTrain?query=${encodeURIComponent(searchQuery)}&page=${page}&size=${size}`;
-      } else {
-        url = `${API_BASE}/train/get-all-train?page=${page}&size=${size}`;
-      }
+      const url = searchQuery.trim()
+        ? `${API_BASE}/train/searchTrain?query=${encodeURIComponent(searchQuery)}&page=${page}&size=${size}`
+        : `${API_BASE}/train/get-all-train?page=${page}&size=${size}`;
 
-      const response = await fetch(url, {
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${auth?.token}` },
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || data.status?.description || "Failed to fetch trains");
 
-      // IMPORTANT: your backend returns { content: [...] } with each item having "id"
+      const data = await res.json();
+      if (!res.ok) {
+        handleBackendError(res, data);
+        return;
+      }
+
       setTrains(Array.isArray(data.content) ? data.content : []);
       setTotalPages(data.totalPages ?? 0);
-    } catch (error) {
-      toast.error(error.message);
+    } catch (err) {
+      console.error("Network error:", err);
+      toast.error("Network error, please try again");
     } finally {
       setLoading(false);
     }
-  }, [auth, page, size, searchQuery]);
+  }, [auth, page, size, searchQuery, handleBackendError]);
 
-  // ✅ Fetch single train by ID
+  // --- Fetch single train by ID ---
   const fetchTrainById = useCallback(
     async (id) => {
       setLoadingTrain(true);
       try {
-        const response = await fetch(`${API_BASE}/train/get-train/${id}`, {
+        const res = await fetch(`${API_BASE}/train/get-train/${id}`, {
           headers: { Authorization: `Bearer ${auth?.token}` },
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to fetch train");
+        const data = await res.json();
+        if (!res.ok) {
+          handleBackendError(res, data);
+          return;
+        }
         setSelectedTrain(data);
-      } catch (error) {
-        toast.error(error.message);
+      } catch (err) {
+        console.error("Network error:", err);
+        toast.error("Network error, please try again");
         setSelectedTrain(null);
       } finally {
-        // fix: stop the spinner (it previously set selectedTrain to false)
         setLoadingTrain(false);
       }
     },
-    [auth]
+    [auth, handleBackendError]
   );
 
-  // ✅ Delete train
+  // --- Delete train ---
   const handleDelete = useCallback(
     async (id) => {
       if (!window.confirm("Are you sure you want to delete this train?")) return;
       try {
-        const response = await fetch(`${API_BASE}/train/delete-train/${id}`, {
+        const res = await fetch(`${API_BASE}/train/delete-train/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${auth?.token}` },
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to delete train");
+        const data = await res.json();
+        if (!res.ok) {
+          handleBackendError(res, data);
+          return;
+        }
         toast.success(typeof data === "string" ? data : "Train deleted");
         fetchTrain();
-      } catch (error) {
-        toast.error(error.message);
+      } catch (err) {
+        console.error("Network error:", err);
+        toast.error("Network error, please try again");
       } finally {
         setOpenDropdownId(null);
       }
     },
-    [auth, fetchTrain]
+    [auth, fetchTrain, handleBackendError]
   );
 
+  // --- Update train ---
   const handleUpdate = useCallback((train) => {
-    setSelectedTrain(train);
-    setShowForm(true);
+    setUpdateTrain(train);
     setOpenDropdownId(null);
-    setOpenClassesId(null);
   }, []);
 
+  // --- View train details ---
   const handleView = useCallback(
     (train) => {
-      fetchTrainById(train.id); // backend uses "id"
+      fetchTrainById(train.id);
       setOpenDropdownId(null);
       setOpenClassesId(null);
     },
     [fetchTrainById]
   );
 
-  // Open the Actions dropdown
+  // --- Dropdown handlers ---
   const handleActionDropdownOpen = useCallback(
-    (id, event) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const dropdownWidth = 160;
-      const viewportWidth = window.innerWidth;
-      const left = Math.min(rect.right - dropdownWidth, viewportWidth - dropdownWidth - 10);
+    (id, e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const left = Math.min(rect.right - 160, window.innerWidth - 160 - 10);
       setDropdownPosition({ top: rect.bottom + window.scrollY, left });
       setOpenDropdownId(openDropdownId === id ? null : id);
-      // close classes if open
       setOpenClassesId(null);
     },
     [openDropdownId]
   );
 
-  // Open the Classes dropdown
   const handleClassesDropdownOpen = useCallback(
-    (id, event) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      const dropdownWidth = 200;
-      const viewportWidth = window.innerWidth;
-      const left = Math.min(rect.right - dropdownWidth, viewportWidth - dropdownWidth - 10);
+    (id, e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const left = Math.min(rect.right - 200, window.innerWidth - 200 - 10);
       setClassesDropdownPosition({ top: rect.bottom + window.scrollY, left });
       setOpenClassesId(openClassesId === id ? null : id);
-      // close actions if open
       setOpenDropdownId(null);
     },
     [openClassesId]
   );
 
-  // Close dropdowns on outside click / Esc
+  // --- Close dropdowns on outside click ---
   const handleClickOutside = useCallback(
     (event) => {
-      const actionTriggerEl = actionTriggerRefs.current[openDropdownId];
-      const classesTriggerEl = classesTriggerRefs.current[openClassesId];
+      const actionEl = actionTriggerRefs.current[openDropdownId];
+      const classesEl = classesTriggerRefs.current[openClassesId];
       const actionMenuEl = actionMenuRef.current;
       const classesMenuEl = classesMenuRef.current;
 
-      // If click is outside both trigger and menu for actions
-      const clickOutsideActions =
-        openDropdownId !== null &&
-        actionTriggerEl &&
+      if (
+        openDropdownId &&
+        actionEl &&
         actionMenuEl &&
-        !actionTriggerEl.contains(event.target) &&
-        !actionMenuEl.contains(event.target);
+        !actionEl.contains(event.target) &&
+        !actionMenuEl.contains(event.target)
+      ) {
+        setOpenDropdownId(null);
+      }
 
-      // If click is outside both trigger and menu for classes
-      const clickOutsideClasses =
-        openClassesId !== null &&
-        classesTriggerEl &&
+      if (
+        openClassesId &&
+        classesEl &&
         classesMenuEl &&
-        !classesTriggerEl.contains(event.target) &&
-        !classesMenuEl.contains(event.target);
-
-      if (clickOutsideActions) setOpenDropdownId(null);
-      if (clickOutsideClasses) setOpenClassesId(null);
+        !classesEl.contains(event.target) &&
+        !classesMenuEl.contains(event.target)
+      ) {
+        setOpenClassesId(null);
+      }
     },
     [openDropdownId, openClassesId]
   );
 
   useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
     const onKey = (e) => {
       if (e.key === "Escape") {
         setOpenDropdownId(null);
@@ -193,7 +208,6 @@ export default function TrainList() {
         setSelectedTrain(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -202,8 +216,8 @@ export default function TrainList() {
   }, [handleClickOutside]);
 
   useEffect(() => {
-    if (auth?.token && !showForm) fetchTrain();
-  }, [auth, page, showForm, fetchTrain]);
+    if (auth?.token && !showCreateForm && !updateTrain) fetchTrain();
+  }, [auth, page, showCreateForm, updateTrain, fetchTrain]);
 
   const handleSearch = useCallback(() => {
     setPage(0);
@@ -213,11 +227,12 @@ export default function TrainList() {
   const roles = auth?.roles || [];
 
   const renderPageButtons = useMemo(() => {
-    if (totalPages === 0 || showForm) return null;
+    if (totalPages === 0 || showCreateForm || updateTrain) return [];
     const maxButtons = 5;
     let start = Math.max(0, page - 2);
     let end = Math.min(totalPages, start + maxButtons);
     start = Math.max(0, end - maxButtons);
+
     return Array.from({ length: end - start }, (_, i) => {
       const pageIndex = start + i;
       return (
@@ -230,32 +245,43 @@ export default function TrainList() {
         </button>
       );
     });
-  }, [page, totalPages, showForm]);
+  }, [page, totalPages, showCreateForm, updateTrain]);
 
   if (!roles.includes("SUPERADMIN_ROLE")) {
     return (
       <div className={styles.notAuthorized}>
         <h2>🚫 Not Authorized</h2>
-        <p>You don’t have permission to view station management.</p>
+        <p>You don’t have permission to view train management.</p>
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <TrainDetailsModal
-        train={selectedTrain}
-        loading={loadingTrain}
-        onClose={() => setSelectedTrain(null)}
-      />
+      <TrainDetailsModal train={selectedTrain} loading={loadingTrain} onClose={() => setSelectedTrain(null)} />
 
-      {!showForm ? (
+      {/* Show Create or Update forms */}
+      {showCreateForm ? (
+        <TrainForm
+          onSuccess={() => {
+            setShowCreateForm(false);
+            fetchTrain();
+          }}
+        />
+      ) : updateTrain ? (
+        <TrainUpdateForm
+          train={updateTrain}
+          onSuccess={() => {
+            setUpdateTrain(null);
+            fetchTrain();
+          }}
+            onBack={() => setUpdateTrain(null)}
+        />
+      ) : (
         <>
           <div className={styles.headerRow}>
             <h2 className={styles.title}>Train</h2>
-            <button className={styles.addButton} onClick={() => setShowForm(true)}>
-              + Add Train
-            </button>
+            <button className={styles.addButton} onClick={() => setShowCreateForm(true)}>+ Add Train</button>
           </div>
 
           <div className={styles.searchForm}>
@@ -288,13 +314,11 @@ export default function TrainList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {trains.map((train, index) => (
+                  {trains.map((train, idx) => (
                     <tr key={train.id}>
-                      <td>{page * size + index + 1}</td>
+                      <td>{page * size + idx + 1}</td>
                       <td>{train.trainName}</td>
                       <td>{train.trainCode}</td>
-
-                      {/* Classes column with 3 dots */}
                       <td>
                         <button
                           className={styles.actionIcon}
@@ -307,8 +331,6 @@ export default function TrainList() {
                           ⋮
                         </button>
                       </td>
-
-                      {/* Actions column with 3 dots */}
                       <td>
                         <button
                           className={styles.actionIcon}
@@ -326,25 +348,19 @@ export default function TrainList() {
                 </tbody>
               </table>
 
-              {/* Actions dropdown (Update / View / Delete) */}
+              {/* Actions dropdown */}
               {openDropdownId &&
                 (() => {
-                  const train = trains.find((s) => s.id === openDropdownId);
+                  const train = trains.find((t) => t.id === openDropdownId);
                   return createPortal(
                     <div
                       className={styles.actionDropdown}
                       ref={actionMenuRef}
-                      style={{
-                        top: dropdownPosition.top,
-                        left: dropdownPosition.left,
-                      }}
+                      style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
                     >
                       <button onClick={() => handleUpdate(train)}>Update</button>
                       <button onClick={() => handleView(train)}>View</button>
-                      <button
-                        className={styles.deleteAction}
-                        onClick={() => handleDelete(train.id)}
-                      >
+                      <button className={styles.deleteAction} onClick={() => handleDelete(train.id)}>
                         Delete
                       </button>
                     </div>,
@@ -352,61 +368,37 @@ export default function TrainList() {
                   );
                 })()}
 
-              {/* Classes dropdown (read-only list) */}
+              {/* Classes dropdown */}
               {openClassesId &&
                 (() => {
-                  const train = trains.find((s) => s.id === openClassesId);
+                  const train = trains.find((t) => t.id === openClassesId);
                   const list = Array.isArray(train?.trainClasses) ? train.trainClasses : [];
                   return createPortal(
                     <div
                       className={styles.actionDropdown}
                       ref={classesMenuRef}
-                      style={{
-                        top: classesDropdownPosition.top,
-                        left: classesDropdownPosition.left,
-                        minWidth: 200,
-                      }}
+                      style={{ top: classesDropdownPosition.top, left: classesDropdownPosition.left, minWidth: 200 }}
                     >
-                      {list.length > 0 ? (
-                        list.map((cls, i) => (
-                          <button key={i} className={styles.classItem} disabled>
-                            {cls}
-                          </button>
-                        ))
-                      ) : (
-                        <button className={styles.classItem} disabled>
-                          No classes
-                        </button>
-                      )}
+                      {list.length > 0
+                        ? list.map((cls, i) => (
+                            <button key={i} className={styles.classItem} disabled>
+                              {cls}
+                            </button>
+                          ))
+                        : <button className={styles.classItem} disabled>No classes</button>}
                     </div>,
                     document.body
                   );
                 })()}
 
               <div className={styles.pagination}>
-                <button disabled={page === 0} onClick={() => setPage(page - 1)}>
-                  Previous
-                </button>
+                <button disabled={page === 0} onClick={() => setPage(page - 1)}>Previous</button>
                 {renderPageButtons}
-                <button
-                  disabled={page === totalPages - 1 || totalPages === 0}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </button>
+                <button disabled={page === totalPages - 1 || totalPages === 0} onClick={() => setPage(page + 1)}>Next</button>
               </div>
             </>
           )}
         </>
-      ) : (
-        <TrainForm
-          train={selectedTrain}
-          onSuccess={() => {
-            setShowForm(false);
-            setSelectedTrain(null);
-            fetchTrain();
-          }}
-        />
       )}
     </div>
   );

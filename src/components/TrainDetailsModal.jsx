@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import styles from "../styles/TrainDetailsModal.module.css";
 
 export default function TrainDetailsModal({ train, loading, onClose }) {
-  // Only render modal if loading or station exists
+ 
   if (!train && !loading) return null;
 
   return createPortal(
@@ -35,14 +35,6 @@ export default function TrainDetailsModal({ train, loading, onClose }) {
               <strong>Train Code:</strong>{" "}
               <span>{train.trainCode || "-"}</span>
             </div>
-            {/* <div className={styles.detailsRow}>
-              <strong>Created At:</strong>{" "}
-              <span>{station.createdAt || "-"}</span>
-            </div>
-            <div className={styles.detailsRow}>
-              <strong>Updated At:</strong>{" "}
-              <span>{station.updatedAt || "-"}</span>
-            </div> */}
           </>
         )}
       </div>
