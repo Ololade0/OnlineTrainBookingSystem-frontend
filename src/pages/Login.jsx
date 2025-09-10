@@ -11,6 +11,8 @@ import { AuthContext } from "../context/AuthContext";
 function buildAuthUrl(endpoint = "login") {
   const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
   const base = baseRaw.replace(/\/+$/, ""); // trim trailing slash
+console.log("Env value:", process.env.REACT_APP_API_BASE_URL);
+console.log("Final URL:", buildAuthUrl("login"));
 
   if (!base) throw new Error("Missing REACT_APP_API_BASE_URL");
 
