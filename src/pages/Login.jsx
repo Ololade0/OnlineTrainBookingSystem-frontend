@@ -72,6 +72,7 @@ const Login = () => {
     }
     return true;
   };
+  console.log("API Base URL is:", process.env.REACT_APP_API_BASE_URL);
 
   const handleLogin = async (e) => {
     e.preventDefault();
