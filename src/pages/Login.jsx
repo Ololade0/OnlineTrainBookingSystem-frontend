@@ -5,14 +5,24 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { AuthContext } from "../context/AuthContext";
 
-/**
- * Build a correct auth URL regardless of how REACT_APP_API_BASE_URL is set.
- */
+
+// function buildAuthUrl(endpoint = "login") {
+//   const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
+//   const base = baseRaw.replace(/\/+$/, ""); // trim trailing slash
+// console.log("Env value:", process.env.REACT_APP_API_BASE_URL);
+// console.log("Final URL:", buildAuthUrl("login"));
+
+//   if (!base) throw new Error("Missing REACT_APP_API_BASE_URL");
+
+//   if (/\/api\/v1\/auth$/.test(base)) return `${base}/${endpoint}`;
+//   if (/\/api\/v1$/.test(base)) return `${base}/auth/${endpoint}`;
+//   return `${base}/api/v1/auth/${endpoint}`;
+// }
+
+
 function buildAuthUrl(endpoint = "login") {
   const baseRaw = process.env.REACT_APP_API_BASE_URL || "";
   const base = baseRaw.replace(/\/+$/, ""); // trim trailing slash
-console.log("Env value:", process.env.REACT_APP_API_BASE_URL);
-console.log("Final URL:", buildAuthUrl("login"));
 
   if (!base) throw new Error("Missing REACT_APP_API_BASE_URL");
 
@@ -20,6 +30,10 @@ console.log("Final URL:", buildAuthUrl("login"));
   if (/\/api\/v1$/.test(base)) return `${base}/auth/${endpoint}`;
   return `${base}/api/v1/auth/${endpoint}`;
 }
+
+// For debugging (do this outside the function)
+console.log("Env value:", process.env.REACT_APP_API_BASE_URL);
+console.log("Final URL:", buildAuthUrl("login"));
 
 /** Safely parse JSON (won’t throw on empty/non-JSON bodies). */
 function safeParseJson(text) {

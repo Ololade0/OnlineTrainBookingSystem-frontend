@@ -67,7 +67,7 @@ export default function StaffList() {
         setLoading(false);
       }
     },
-    [API_BASE, auth, page, size]
+    [auth, page, size]
   );
 
   // 🔎 Search staffs
@@ -97,7 +97,7 @@ export default function StaffList() {
         setLoading(false);
       }
     },
-    [API_BASE, auth, page, size]
+    [auth, page, size]
   );
 
   // View details
@@ -118,7 +118,7 @@ export default function StaffList() {
         setLoadingUser(false);
       }
     },
-    [API_BASE, auth]
+    [auth]
   );
 
   const handleDelete = useCallback(
@@ -145,7 +145,7 @@ export default function StaffList() {
         setOpenDropdownId(null);
       }
     },
-    [API_BASE, auth, fetchAllStaffs, mode, page, searchQuery, searchStaffs]
+    [auth, fetchAllStaffs, mode, page, searchQuery, searchStaffs]
   );
 
   const handleUpdate = useCallback((staff) => {
