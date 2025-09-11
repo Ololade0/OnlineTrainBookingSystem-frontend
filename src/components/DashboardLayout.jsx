@@ -3,6 +3,7 @@ import styles from "../styles/DashboardLayout.module.css";
 
 import StaffList from "./StaffList";
 import StationList from "./StationList";
+import SeatOverview from "./SeatOverview";
 import TrainList from "./TrainList";
 import ScheduleList from "./ScheduleList"; // Import the ScheduleList component
 import Layout from "./Layout"; // ✅ import your global layout
@@ -64,7 +65,11 @@ const DashboardLayout = () => {
                 </button>
               </li>
               <li>
-                <button className={styles.sidebarButton}>Seat</button>
+                <button className={styles.sidebarButton}
+                 onClick={() => setMainContentView("seats")} 
+                >
+                  Seat
+                  </button>
               </li>
               <li>
                 <button className={styles.sidebarButton}>Prices</button>
@@ -113,6 +118,7 @@ const DashboardLayout = () => {
           {mainContentView === "staffs" && <StaffList />}
           {mainContentView === "stations" && <StationList />}
           {mainContentView === "trains" && <TrainList />}
+          {mainContentView === "seats" && <SeatOverview />}
           {mainContentView === "schedules" && <ScheduleList />} {/* Add ScheduleList component */}
         </main>
       </div>
@@ -121,3 +127,5 @@ const DashboardLayout = () => {
 };
 
 export default DashboardLayout;
+
+

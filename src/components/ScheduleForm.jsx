@@ -8,7 +8,7 @@ const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 export default function ScheduleForm({ onClose }) {
   const { auth, logout } = useAuth();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
   const isSuperAdmin = auth?.roles.includes("SUPERADMIN_ROLE");
 
   const [routes, setRoutes] = useState([]);

@@ -32,6 +32,11 @@ const Header = () => {
         ) : (
           <>
 
+                  {/* Only show Dashboard link if SUPERADMIN_ROLE */}
+        {auth.roles?.includes("SUPERADMIN_ROLE") && (
+          <a href="/dashboard">Dashboard</a>
+        )}
+
                <button onClick={handleLogout} className={styles.logoutBtn}>
               Logout
             </button>
